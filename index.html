@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DashList - GD List</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-zinc-950 text-white min-h-screen relative">
+
+  <!-- Bordes laterales dinámicos -->
+  <div id="borderLeft" class="side-border-left"></div>
+  <div id="borderRight" class="side-border-right"></div>
+
+  <!-- Header Glassmorphic -->
+  <header class="fixed top-3 left-3 right-3 z-40">
+    <div class="glass-nav max-w-2xl mx-auto px-4 py-2.5 rounded-2xl flex items-center justify-between shadow-lg">
+      
+      <!-- Logo Principal -->
+      <a href="index.html" class="flex items-center">
+        <img id="mainLogo" src="https://i.imgur.com/1YzWijH.png" alt="DashList" class="h-9 w-auto object-contain">
+      </a>
+
+      <!-- Acciones de Navegación -->
+      <div class="flex items-center gap-2">
+        <!-- Switch Tema Claro/Oscuro -->
+        <button id="themeToggleBtn" class="p-2 rounded-xl hover:bg-white/10 transition">
+          <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+          <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+        </button>
+
+        <!-- Botón Discord Auth / Login -->
+        <button id="loginBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition">
+          Entrar
+        </button>
+
+        <!-- Botón Menú Hamburguesa (+) -->
+        <button id="menuToggleBtn" class="p-2 border border-white/20 rounded-xl hover:bg-white/10 transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Menú Hamburguesa Lateral / Overlay -->
+  <aside id="sideMenu" class="fixed inset-y-0 right-0 w-80 bg-zinc-900/95 backdrop-blur-md border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 p-6 flex flex-col justify-between">
+    <div>
+      <!-- Info Perfil Discord (Si está iniciado sesión) -->
+      <div id="userProfile" class="hidden p-4 bg-white/5 rounded-2xl border border-white/10 mb-6">
+        <div class="flex items-center gap-3">
+          <img id="userAvatar" src="" class="w-12 h-12 rounded-full">
+          <div>
+            <h4 id="userName" class="font-bold text-sm"></h4>
+            <span id="userRole" class="text-[10px] bg-indigo-500/20 text-indigo-400 px-2 py-0.5 rounded-full font-semibold"></span>
+          </div>
+        </div>
+        <div class="mt-3 text-xs text-zinc-400">
+          Hardest: <span id="userHardest" class="text-white font-medium">Ninguno</span>
+        </div>
+      </div>
+
+      <!-- Acciones de Envíos -->
+      <div class="space-y-2">
+        <button class="w-full text-left py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition flex items-center justify-between">
+          <span>Enviar Récord</span>
+          <span class="text-xs text-zinc-500">→</span>
+        </button>
+        <button class="w-full text-left py-3 px-4 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition flex items-center justify-between">
+          <span>Solicitar Nivel</span>
+          <span class="text-xs text-zinc-500">→</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Redes Sociales -->
+    <div class="border-t border-white/10 pt-4 flex justify-around text-zinc-400">
+      <a href="#" class="hover:text-white text-sm">Discord</a>
+      <a href="#" class="hover:text-white text-sm">YouTube</a>
+      <a href="#" class="hover:text-white text-sm">X (Twitter)</a>
+    </div>
+  </aside>
+
+  <!-- Navegación por Cápsulas (Lista / Leaderboard) -->
+  <main class="max-w-md mx-auto pt-24 px-4 pb-12">
+    <div class="flex bg-white/5 p-1 rounded-2xl mb-6 border border-white/10">
+      <button id="tabLista" class="flex-1 py-2 rounded-xl font-bold text-sm bg-indigo-600 text-white transition">Lista</button>
+      <button id="tabLeaderboard" class="flex-1 py-2 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition">Leaderboard</button>
+    </div>
+
+    <!-- Render de Contenido Principal -->
+    <div id="contentContainer">
+      <!-- Se llena dinámicamente desde App.js, Lista.html/Leaderboard.html -->
+    </div>
+  </main>
+
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+  <script src="players.js"></script>
+</body>
+</html>
