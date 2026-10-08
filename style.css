@@ -8,17 +8,17 @@
 
 .light-theme .glass-nav {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Bordes laterales dinámicos fijados a la pantalla */
+/* Bordes laterales dinámicos fijados a la pantalla (z-index por debajo del header) */
 .border-side {
   position: fixed;
   top: 0;
   bottom: 0;
   height: 100vh;
   pointer-events: none;
-  z-index: 30;
+  z-index: 10; /* Queda detrás del header que tiene z-40 */
   background-repeat: no-repeat;
   transition: background-image 0.3s ease;
 }
@@ -29,13 +29,13 @@
     left: 0;
     width: 18vw;
     background-position: left center;
-    background-size: 100% 100%; /* Cubre de arriba a abajo */
+    background-size: 100% 100%;
   }
   #borderRight {
     right: 0;
     width: 18vw;
     background-position: right center;
-    background-size: 100% 100%; /* Cubre de arriba a abajo */
+    background-size: 100% 100%;
   }
 }
 
@@ -43,26 +43,45 @@
 @media (orientation: portrait) {
   #borderLeft {
     left: 0;
-    width: 25vw;
+    width: 22vw;
     background-position: left center;
-    background-size: 100% 100%; /* Cubre de arriba a abajo */
+    background-size: 100% 100%;
   }
   #borderRight {
     right: 0;
-    width: 25vw;
+    width: 22vw;
     background-position: right center;
-    background-size: 100% 100%; /* Cubre de arriba a abajo */
+    background-size: 100% 100%;
   }
 }
 
-/* Reglas de transición general */
+/* Transición general y soporte para Modo Claro */
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
 }
 
-/* Estilos para el modo claro */
 body.light-theme {
   background-color: #f4f4f5 !important;
   color: #18181b !important;
+}
+
+/* Panel Lateral Adaptable al Modo Claro */
+body.light-theme #sideMenu {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-left-color: rgba(0, 0, 0, 0.1) !important;
+  color: #18181b !important;
+}
+
+body.light-theme #sideMenu button {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: #18181b !important;
+}
+
+body.light-theme #sideMenu button:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+body.light-theme #sideMenu div {
+  border-color: rgba(0, 0, 0, 0.1) !important;
 }
