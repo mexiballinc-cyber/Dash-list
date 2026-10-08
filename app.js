@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.documentElement.classList.toggle('dark');
     document.body.classList.toggle('light-theme');
     
-    // Cambiar íconos de sol y luna
+    // Cambiar íconos de sol y luna en el botón
     const sunIcon = document.getElementById('sunIcon');
     const moonIcon = document.getElementById('moonIcon');
     if (sunIcon && moonIcon) {
@@ -34,12 +34,16 @@ function updateUIImages() {
   if (typeof getActivePack !== 'function') return;
 
   const pack = getActivePack();
+  
+  // Verificamos si la página TIENE la clase 'dark' activa
   const isDark = document.documentElement.classList.contains('dark');
 
-  // 1. Actualizar Logo Principal
+  // 1. Corregir Logo:
+  // Modo Oscuro (dark) -> Usa logoLight (imagen clara/blanca) para resaltar sobre fondo negro
+  // Modo Claro (light) -> Usa logoDark (imagen oscura/negra) para resaltar sobre fondo claro
   const mainLogo = document.getElementById('mainLogo');
   if (mainLogo) {
-    mainLogo.src = isDark ? pack.logoDark : pack.logoLight;
+    mainLogo.src = isDark ? pack.logoLight : pack.logoDark;
   }
 
   // 2. Detectar Orientación (Horizontal vs Vertical)
@@ -56,6 +60,6 @@ function updateUIImages() {
   }
 }
 
-// Reaccionar al cambio de tamaño de ventana o al girar el celular
+// Reaccionar en tiempo real al cambiar tamaño o girar el celular
 window.addEventListener('resize', updateUIImages);
 window.addEventListener('orientationchange', updateUIImages);
