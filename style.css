@@ -1,4 +1,17 @@
-/* Bordes fijados a los laterales sin estorbar los clicks */
+/* Glassmorphism Navigation Header */
+.glass-nav {
+  background: rgba(18, 18, 22, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.light-theme .glass-nav {
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* Bordes laterales dinámicos fijados a la pantalla */
 .border-side {
   position: fixed;
   top: 0;
@@ -10,34 +23,46 @@
   transition: background-image 0.3s ease;
 }
 
-/* En vertical (Celular de pie): Bordes delgados y pegados a la orilla */
-@media (orientation: portrait) {
-  #borderLeft {
-    left: 0;
-    width: 15vw;
-    background-position: left center;
-    background-size: contain;
-  }
-  #borderRight {
-    right: 0;
-    width: 15vw;
-    background-position: right center;
-    background-size: contain;
-  }
-}
-
-/* En horizontal (PC o cel acostado): Bordes más anchos y expresivos */
+/* En pantalla Horizontal (PC o celular acostado) */
 @media (orientation: landscape) {
   #borderLeft {
     left: 0;
-    width: 22vw;
+    width: 18vw;
     background-position: left center;
-    background-size: contain;
+    background-size: 100% 100%; /* Cubre de arriba a abajo */
   }
   #borderRight {
     right: 0;
-    width: 22vw;
+    width: 18vw;
     background-position: right center;
-    background-size: contain;
+    background-size: 100% 100%; /* Cubre de arriba a abajo */
   }
+}
+
+/* En pantalla Vertical (Celular de pie) */
+@media (orientation: portrait) {
+  #borderLeft {
+    left: 0;
+    width: 25vw;
+    background-position: left center;
+    background-size: 100% 100%; /* Cubre de arriba a abajo */
+  }
+  #borderRight {
+    right: 0;
+    width: 25vw;
+    background-position: right center;
+    background-size: 100% 100%; /* Cubre de arriba a abajo */
+  }
+}
+
+/* Reglas de transición general */
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+/* Estilos para el modo claro */
+body.light-theme {
+  background-color: #f4f4f5 !important;
+  color: #18181b !important;
 }
