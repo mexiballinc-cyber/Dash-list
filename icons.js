@@ -1,9 +1,18 @@
-// icons.js - Mapeo de packs de imágenes por temporada/evento
+// icons.js - Mapeo de packs con imágenes independientes por lado y orientación
 const SEASON_PACKS = {
   normal: {
     logoDark: "https://i.imgur.com/1YzWijH.png",
     logoLight: "https://i.imgur.com/EMeHUb5.png",
-    borders: "https://i.imgur.com/NiTv1aA.png",
+    borders: {
+      portrait: {
+        left: "https://i.imgur.com/G9rRyUt.png",
+        right: "https://i.imgur.com/l1pDZQr.png"
+      },
+      landscape: {
+        left: "https://i.imgur.com/jPUOB5Q.png",
+        right: "https://i.imgur.com/zaPvcKM.png"
+      }
+    },
     easy: "https://i.imgur.com/aehGnWn.png",
     normal: "https://i.imgur.com/WNix2GD.png",
     hard: "https://i.imgur.com/xeZqpcb.png",
@@ -15,7 +24,16 @@ const SEASON_PACKS = {
   otono: {
     logoDark: "https://i.imgur.com/ISvQYCo.png",
     logoLight: "https://i.imgur.com/qF6y99N.png",
-    borders: "https://i.imgur.com/801ofZk.png",
+    borders: {
+      portrait: {
+        left: "https://i.imgur.com/1djKgJm.png",
+        right: "https://i.imgur.com/1b1w86L.png"
+      },
+      landscape: {
+        left: "https://i.imgur.com/efZug2P.png",
+        right: "https://i.imgur.com/Dx7mlSc.png"
+      }
+    },
     easy: "https://i.imgur.com/27ORuWJ.png",
     normal: "https://i.imgur.com/lTAYMFO.png",
     hard: "https://i.imgur.com/X0CMj45.png",
@@ -27,7 +45,16 @@ const SEASON_PACKS = {
   invierno: {
     logoDark: "https://i.imgur.com/Y7wlzY4.png",
     logoLight: "https://i.imgur.com/88zJFWm.png",
-    borders: "https://i.imgur.com/tdfBYLY.png",
+    borders: {
+      portrait: {
+        left: "https://i.imgur.com/VMhkoHN.png",
+        right: "https://i.imgur.com/NCJaPxX.png"
+      },
+      landscape: {
+        left: "https://i.imgur.com/REmC5hu.png",
+        right: "https://i.imgur.com/wKxI5mB.png"
+      }
+    },
     easy: "https://i.imgur.com/AhT9g7J.png",
     normal: "https://i.imgur.com/A2PPbjg.png",
     hard: "https://i.imgur.com/RYrY9dD.png",
@@ -39,7 +66,16 @@ const SEASON_PACKS = {
   mexico: {
     logoDark: "https://i.imgur.com/ZH5zAci.png",
     logoLight: "https://i.imgur.com/qZQvPoz.png",
-    borders: "https://i.imgur.com/X7RkFcP.png",
+    borders: {
+      portrait: {
+        left: "https://i.imgur.com/THnkbEF.png",
+        right: "https://i.imgur.com/VBWFQCZ.png"
+      },
+      landscape: {
+        left: "https://i.imgur.com/F5DVMZ5.png",
+        right: "https://i.imgur.com/FmLoHRs.png"
+      }
+    },
     easy: "https://i.imgur.com/I25Iu3B.png",
     normal: "https://i.imgur.com/FE9x01P.png",
     hard: "https://i.imgur.com/Q9Ywqxm.png",
@@ -59,6 +95,8 @@ function getActivePack() {
 function setSeason(packName) {
   if (SEASON_PACKS[packName]) {
     currentSeason = packName;
-    updateUIImages();
+    if (typeof updateUIImages === 'function') {
+      updateUIImages();
+    }
   }
 }
