@@ -1,39 +1,43 @@
-/* Glassmorphism Navigation Header */
-.glass-nav {
-  background: rgba(18, 18, 22, 0.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.light-theme .glass-nav {
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-/* Ajustes para marcos laterales en móvil */
-.side-border-left, .side-border-right {
+/* Bordes fijados a los laterales sin estorbar los clicks */
+.border-side {
   position: fixed;
   top: 0;
   bottom: 0;
-  width: 45px;
-  background-size: contain;
-  background-repeat: repeat-y;
+  height: 100vh;
   pointer-events: none;
-  z-index: 20;
+  z-index: 30;
+  background-repeat: no-repeat;
+  transition: background-image 0.3s ease;
 }
 
-.side-border-left { left: 0; background-position: left center; }
-.side-border-right { right: 0; background-position: right center; }
-
-@media (min-width: 768px) {
-  .side-border-left, .side-border-right {
-    width: 90px;
+/* En vertical (Celular de pie): Bordes delgados y pegados a la orilla */
+@media (orientation: portrait) {
+  #borderLeft {
+    left: 0;
+    width: 15vw;
+    background-position: left center;
+    background-size: contain;
+  }
+  #borderRight {
+    right: 0;
+    width: 15vw;
+    background-position: right center;
+    background-size: contain;
   }
 }
 
-/* Transiciones suaves */
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
-  overflow-x: hidden;
+/* En horizontal (PC o cel acostado): Bordes más anchos y expresivos */
+@media (orientation: landscape) {
+  #borderLeft {
+    left: 0;
+    width: 22vw;
+    background-position: left center;
+    background-size: contain;
+  }
+  #borderRight {
+    right: 0;
+    width: 22vw;
+    background-position: right center;
+    background-size: contain;
+  }
 }
