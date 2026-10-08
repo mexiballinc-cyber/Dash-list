@@ -38,12 +38,12 @@ function updateUIImages() {
   // Verificamos si la página está en modo oscuro
   const isDark = document.documentElement.classList.contains('dark');
 
-  // Corregir asignación del Logo:
-  // Modo Oscuro (dark) -> usa logoLight (letras blancas/claras)
-  // Modo Claro (light)  -> usa logoDark (letras oscuras/negras)
+  // Asignación correcta de logos:
+  // Modo Oscuro (dark) -> usa logoDark (Logo blanco para resaltar sobre el fondo negro)
+  // Modo Claro (light)  -> usa logoLight (Logo negro para resaltar sobre el fondo blanco)
   const mainLogo = document.getElementById('mainLogo');
   if (mainLogo) {
-    mainLogo.src = isDark ? pack.logoLight : pack.logoDark;
+    mainLogo.src = isDark ? pack.logoDark : pack.logoLight;
   }
 
   // Detectar Orientación (Horizontal vs Vertical)
