@@ -35,22 +35,22 @@ function updateUIImages() {
 
   const pack = getActivePack();
   
-  // Verificamos si la página TIENE la clase 'dark' activa
+  // Verificamos si la página está en modo oscuro
   const isDark = document.documentElement.classList.contains('dark');
 
-  // 1. Corregir Logo:
-  // Modo Oscuro (dark) -> Usa logoLight (imagen clara/blanca) para resaltar sobre fondo negro
-  // Modo Claro (light) -> Usa logoDark (imagen oscura/negra) para resaltar sobre fondo claro
+  // Corregir asignación del Logo:
+  // Modo Oscuro (dark) -> usa logoLight (letras blancas/claras)
+  // Modo Claro (light)  -> usa logoDark (letras oscuras/negras)
   const mainLogo = document.getElementById('mainLogo');
   if (mainLogo) {
     mainLogo.src = isDark ? pack.logoLight : pack.logoDark;
   }
 
-  // 2. Detectar Orientación (Horizontal vs Vertical)
+  // Detectar Orientación (Horizontal vs Vertical)
   const isLandscape = window.innerWidth > window.innerHeight;
   const orientationKey = isLandscape ? 'landscape' : 'portrait';
 
-  // 3. Aplicar imágenes laterales
+  // Aplicar imágenes laterales
   const borderLeft = document.getElementById('borderLeft');
   const borderRight = document.getElementById('borderRight');
 
