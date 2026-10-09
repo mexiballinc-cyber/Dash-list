@@ -56,5 +56,17 @@ export function listenLeaderboard(callback) {
     } else {
       callback({});
     }
+
+    // Listener en vivo para la Lista Oficial de Niveles
+export function listenLevels(callback) {
+  const levelsRef = ref(db, 'levels');
+  onValue(levelsRef, (snapshot) => {
+    if (snapshot.exists()) {
+      callback(snapshot.val());
+    } else {
+      callback({});
+    }
+  });
+}
   });
 }
