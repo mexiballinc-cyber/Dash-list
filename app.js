@@ -1,17 +1,21 @@
-// app.js - Control de interfaz, envío a Firebase y Leaderboard
-import { submitPendingLevel, submitPendingRecord, listenTheme, listenLeaderboard } from './firebase-config.js';
+// app.js - Restaurado con diseño visual + Firebase
+import { db } from './firebase-config.js';
+import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 1. Cargar las imágenes e íconos inmediatamente al abrir la página
   updateUIImages();
 
-  // Escuchar cambio de tema global desde el Bot de Discord
-  listenTheme((seasonName) => {
-    if (typeof setSeason === 'function') {
-      setSeason(seasonName);
+  // Escuchar cambio de tema global en tiempo real desde Firebase
+  const themeRef = ref(db, 'settings/config/currentSeason');
+  onValue(themeRef, (snapshot) => {
+    if (snapshot.exists() && typeof setSeason === 'function') {
+      setSeason(snapshot.val());
+      updateUIImages();
     }
   });
 
-  // Menú Lateral y Overlay
+  // Menú Lateral
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
   const menuOverlay = document.getElementById('menuOverlay');
@@ -31,6 +35,22 @@ document.addEventListener('DOMContentLoaded', () => {
   closeMenuBtn?.addEventListener('click', closeMenu);
   menuOverlay?.addEventListener('click', closeMenu);
 
+  // Toggle Tema Claro / Oscuro
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  themeToggleBtn?.addEventListener('click', () => {
+    document.documentElement.classList.toggle('dark');
+    document.body.classList.toggle('light-theme');
+    
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+    if (sunIcon && moonIcon) {
+      sunIcon.classList.toggle('hidden');
+      moonIcon.classList.toggle('hidden');
+    }
+
+    updateUIImages();
+  });
+
   // Modales
   const submitModal = document.getElementById('submitModal');
   const openSubmitModalBtn = document.getElementById('openSubmitModalBtn');
@@ -48,7 +68,10 @@ document.addEventListener('DOMContentLoaded', () => {
   navAddLevelBtn?.addEventListener('click', () => { closeMenu(); addLevelModal?.classList.remove('hidden'); });
   closeAddLevelModalBtn?.addEventListener('click', () => addLevelModal?.classList.add('hidden'));
 
-  // Formulario: Enviar Nivel Novedoso
+  submitModal?.addEventListener('click', (e) => { if (e.target === submitModal) submitModal?.classList.add('hidden'); });
+  addLevelModal?.addEventListener('click', (e) => { if (e.target === addLevelModal) addLevelModal?.classList.add('hidden'); });
+
+  // 2. Enviar Nivel a Firebase (Realtime Database)
   const addLevelForm = document.getElementById('addLevelForm');
   addLevelForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -63,11 +86,15 @@ document.addEventListener('DOMContentLoaded', () => {
       imgurUrl: document.getElementById('lvlImgur').value,
       duration: document.getElementById('lvlDuration').value,
       objects: document.getElementById('lvlObjects').value,
-      song: document.getElementById('lvlSong').value
+      song: document.getElementById('lvlSong').value,
+      createdAt: Date.now(),
+      notified: false
     };
 
     try {
-      await submitPendingLevel(data);
+      const pendingRef = ref(db, 'pending_levels');
+      const newRef = push(pendingRef);
+      await set(newRef, data);
       alert('¡Nivel enviado a revisión en Discord!');
       addLevelForm.reset();
       addLevelModal?.classList.add('hidden');
@@ -77,7 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Formulario: Enviar Récord
+  // 3. Enviar Récord a Firebase
   const recordForm = document.getElementById('recordForm');
   recordForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -86,11 +113,15 @@ document.addEventListener('DOMContentLoaded', () => {
       playerName: document.getElementById('recordPlayer').value,
       progress: parseInt(document.getElementById('recordProgress').value),
       videoUrl: document.getElementById('recordVideo').value,
-      country: document.getElementById('recordCountry').value || 'N/A'
+      country: document.getElementById('recordCountry').value || 'N/A',
+      createdAt: Date.now(),
+      notified: false
     };
 
     try {
-      await submitPendingRecord(data);
+      const pendingRef = ref(db, 'pending_records');
+      const newRef = push(pendingRef);
+      await set(newRef, data);
       alert('¡Récord enviado a revisión!');
       recordForm.reset();
       submitModal?.classList.add('hidden');
@@ -100,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Tabs: Lista vs Leaderboard
+  // 4. Pestañas de Lista vs Leaderboard
   const btnTabLista = document.getElementById('btnTabLista');
   const btnTabLeaderboard = document.getElementById('btnTabLeaderboard');
   const levelsContainer = document.getElementById('levelsContainer');
@@ -109,19 +140,54 @@ document.addEventListener('DOMContentLoaded', () => {
     btnTabLeaderboard.className = "px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition";
     btnTabLista.className = "px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition";
 
-    listenLeaderboard((lbData) => {
-      renderLeaderboard(lbData, levelsContainer);
+    const lbRef = ref(db, 'leaderboard');
+    onValue(lbRef, (snapshot) => {
+      renderLeaderboard(snapshot.val() || {}, levelsContainer);
     });
   });
 
   btnTabLista?.addEventListener('click', () => {
     btnTabLista.className = "px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition";
     btnTabLeaderboard.className = "px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition";
-    // Aquí puedes llamar la función que renderiza los niveles
+
+    const lvlRef = ref(db, 'levels');
+    onValue(lvlRef, (snapshot) => {
+      renderLevels(snapshot.val() || {}, levelsContainer);
+    });
+  });
+
+  // Escuchar Niveles por defecto al cargar
+  const lvlRef = ref(db, 'levels');
+  onValue(lvlRef, (snapshot) => {
+    renderLevels(snapshot.val() || {}, levelsContainer);
   });
 });
 
-// Renderizar la Leaderboard en la pantalla
+// Función para actualizar Bordes y Logo usando icons.js
+function updateUIImages() {
+  if (typeof getActivePack !== 'function') return;
+
+  const pack = getActivePack();
+  const isDark = document.documentElement.classList.contains('dark');
+
+  const mainLogo = document.getElementById('mainLogo');
+  if (mainLogo) {
+    mainLogo.src = isDark ? pack.logoDark : pack.logoLight;
+  }
+
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const orientationKey = isLandscape ? 'landscape' : 'portrait';
+
+  const borderLeft = document.getElementById('borderLeft');
+  const borderRight = document.getElementById('borderRight');
+
+  if (borderLeft && borderRight && pack.borders) {
+    borderLeft.style.backgroundImage = `url('${pack.borders[orientationKey].left}')`;
+    borderRight.style.backgroundImage = `url('${pack.borders[orientationKey].right}')`;
+  }
+}
+
+// Renderizar la Leaderboard
 function renderLeaderboard(data, container) {
   if (!container) return;
   container.innerHTML = '';
@@ -129,7 +195,7 @@ function renderLeaderboard(data, container) {
   const players = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
 
   if (players.length === 0) {
-    container.innerHTML = `<p class="text-center text-zinc-500 py-8">Aún no hay jugadores registrados en la Leaderboard.</p>`;
+    container.innerHTML = `<p class="text-center text-zinc-500 py-8">Aún no hay jugadores en la Leaderboard.</p>`;
     return;
   }
 
@@ -155,24 +221,36 @@ function renderLeaderboard(data, container) {
   });
 }
 
-function updateUIImages() {
-  if (typeof getActivePack !== 'function') return;
-  const pack = getActivePack();
-  const isDark = document.documentElement.classList.contains('dark');
+// Renderizar Niveles de la Lista
+function renderLevels(data, container) {
+  if (!container) return;
+  container.innerHTML = '';
 
-  const mainLogo = document.getElementById('mainLogo');
-  if (mainLogo) mainLogo.src = isDark ? pack.logoDark : pack.logoLight;
+  const levels = Object.values(data);
 
-  const isLandscape = window.innerWidth > window.innerHeight;
-  const orientationKey = isLandscape ? 'landscape' : 'portrait';
-
-  const borderLeft = document.getElementById('borderLeft');
-  const borderRight = document.getElementById('borderRight');
-
-  if (borderLeft && borderRight && pack.borders) {
-    borderLeft.style.backgroundImage = `url('${pack.borders[orientationKey].left}')`;
-    borderRight.style.backgroundImage = `url('${pack.borders[orientationKey].right}')`;
+  if (levels.length === 0) {
+    container.innerHTML = `<p class="text-center text-zinc-500 py-8">No hay niveles en la lista todavía.</p>`;
+    return;
   }
+
+  levels.forEach((lvl, index) => {
+    const card = document.createElement('div');
+    card.className = "glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-3 shadow-lg";
+    card.innerHTML = `
+      <div class="flex items-center gap-4">
+        <span class="font-black text-xl text-indigo-400">#${index + 1}</span>
+        <img src="${lvl.imgurUrl || ''}" class="w-16 h-12 object-cover rounded-lg border border-white/10" alt="${lvl.name}">
+        <div>
+          <h3 class="font-bold text-white text-base">${lvl.name}</h3>
+          <p class="text-xs text-zinc-400">Por: <span class="text-white font-semibold">${lvl.creatorId}</span> | Verificado: <span class="text-white font-semibold">${lvl.verifierId}</span></p>
+        </div>
+      </div>
+      <div class="text-right">
+        <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30 uppercase">${lvl.difficulty}</span>
+      </div>
+    `;
+    container.appendChild(card);
+  });
 }
 
 window.addEventListener('resize', updateUIImages);
