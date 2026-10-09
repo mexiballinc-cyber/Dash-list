@@ -1,23 +1,33 @@
-// app.js - Híbrido Definitivo Integrado con Firebase & icons.js
-import { db } from './firebase-config.js';
-import { ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAMnhmifHanGHh9lwmm-2Xydchim61CfBA",
+  authDomain: "dashlist-3fbec.firebaseapp.com",
+  databaseURL: "https://dashlist-3fbec-default-rtdb.firebaseio.com",
+  projectId: "dashlist-3fbec",
+  storageBucket: "dashlist-3fbec.firebasestorage.app",
+  messagingSenderId: "686035908732",
+  appId: "1:686035908732:web:0c8cb42e630718479131f9"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Cargar las imágenes e íconos inmediatamente al abrir
   updateUIImages();
 
-  // Escuchar cambio de tema global en tiempo real desde el Bot de Discord
+  // Escuchar cambio de tema global desde Discord
   const themeRef = ref(db, 'settings/config/currentSeason');
   onValue(themeRef, (snapshot) => {
     if (snapshot.exists() && typeof setSeason === 'function') {
       setSeason(snapshot.val());
       updateUIImages();
-      // Re-renderizar la vista activa para actualizar los íconos de dificultad
       refreshActiveTab();
     }
   });
 
-  // 2. Control del Menú Lateral y Overlay Móvil
+  // Menú Lateral
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
   const menuOverlay = document.getElementById('menuOverlay');
@@ -37,7 +47,7 @@ document.addEventListener('DOMContentLoaded', () => {
   closeMenuBtn?.addEventListener('click', closeMenu);
   menuOverlay?.addEventListener('click', closeMenu);
 
-  // 3. Toggle de Tema Manual (Claro / Oscuro UI)
+  // Toggle Tema Sol / Luna
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   themeToggleBtn?.addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');
@@ -49,11 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
       sunIcon.classList.toggle('hidden');
       moonIcon.classList.toggle('hidden');
     }
-
     updateUIImages();
   });
 
-  // 4. Modales de Envío
+  // Modales
   const submitModal = document.getElementById('submitModal');
   const openSubmitModalBtn = document.getElementById('openSubmitModalBtn');
   const navSubmitRecordBtn = document.getElementById('navSubmitRecordBtn');
@@ -73,7 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
   submitModal?.addEventListener('click', (e) => { if (e.target === submitModal) submitModal?.classList.add('hidden'); });
   addLevelModal?.addEventListener('click', (e) => { if (e.target === addLevelModal) addLevelModal?.classList.add('hidden'); });
 
-  // 5. Enviar Solicitud de Nivel a Firebase (Para Mod-Discord)
+  // Formulario: Enviar Nivel a Firebase
   const addLevelForm = document.getElementById('addLevelForm');
   addLevelForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -97,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const pendingRef = ref(db, 'pending_levels');
       const newRef = push(pendingRef);
       await set(newRef, data);
-      alert('¡Nivel enviado a revisión a Discord!');
+      alert('¡Nivel enviado a revisión en Discord!');
       addLevelForm.reset();
       addLevelModal?.classList.add('hidden');
     } catch (err) {
@@ -106,7 +115,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 6. Enviar Solicitud de Récord a Firebase (Para Mod-Discord)
+  // Formulario: Enviar Récord a Firebase
   const recordForm = document.getElementById('recordForm');
   recordForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -133,7 +142,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // 7. Navegación por Pestañas (Lista vs Leaderboard)
+  // Pestañas
   const btnTabLista = document.getElementById('btnTabLista');
   const btnTabLeaderboard = document.getElementById('btnTabLeaderboard');
   const levelsContainer = document.getElementById('levelsContainer');
@@ -170,11 +179,9 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshActiveTab();
   });
 
-  // Carga inicial
   refreshActiveTab();
 });
 
-// Función para actualizar logos y bordes
 function updateUIImages() {
   if (typeof getActivePack !== 'function') return;
 
@@ -182,9 +189,7 @@ function updateUIImages() {
   const isDark = document.documentElement.classList.contains('dark');
 
   const mainLogo = document.getElementById('mainLogo');
-  if (mainLogo) {
-    mainLogo.src = isDark ? pack.logoDark : pack.logoLight;
-  }
+  if (mainLogo) mainLogo.src = isDark ? pack.logoDark : pack.logoLight;
 
   const isLandscape = window.innerWidth > window.innerHeight;
   const orientationKey = isLandscape ? 'landscape' : 'portrait';
@@ -198,7 +203,6 @@ function updateUIImages() {
   }
 }
 
-// Poblar automáticamente el menú desplegable del modal "Submit Record"
 function populateRecordSelect(levelsData) {
   const select = document.getElementById('recordLevel');
   if (!select) return;
@@ -218,7 +222,6 @@ function populateRecordSelect(levelsData) {
   });
 }
 
-// Renderizar la Leaderboard
 function renderLeaderboard(data, container) {
   if (!container) return;
   container.innerHTML = '';
@@ -237,10 +240,7 @@ function renderLeaderboard(data, container) {
       <div class="flex items-center gap-3">
         <span class="font-bold text-lg ${index === 0 ? 'text-amber-400' : 'text-indigo-400'}">#${index + 1}</span>
         <div>
-          <h3 class="font-bold text-white text-base flex items-center gap-2">
-            ${player.name}
-            ${player.country && player.country !== 'N/A' ? `<span class="text-xs text-zinc-400">(${player.country})</span>` : ''}
-          </h3>
+          <h3 class="font-bold text-white text-base">${player.name}</h3>
           <p class="text-xs text-zinc-400">
             Creados: <span class="text-white font-semibold">${player.createdCount || 0}</span> | 
             Verificados: <span class="text-white font-semibold">${player.verifiedCount || 0}</span>
@@ -255,7 +255,6 @@ function renderLeaderboard(data, container) {
   });
 }
 
-// Renderizar la Lista de Niveles con las caritas dibujadas a mano de cada Pack
 function renderLevels(data, container) {
   if (!container) return;
   container.innerHTML = '';
@@ -270,7 +269,6 @@ function renderLevels(data, container) {
   const activePack = typeof getActivePack === 'function' ? getActivePack() : {};
 
   levels.forEach((lvl, index) => {
-    // Obtener la URL de la carita dibujada correspondiente a la dificultad
     const diffKey = (lvl.difficulty || 'demon').toLowerCase();
     const faceUrl = activePack[diffKey] || activePack.demon || '';
 
@@ -280,7 +278,7 @@ function renderLevels(data, container) {
       <div class="flex items-center gap-4">
         <span class="font-black text-xl text-indigo-400">#${index + 1}</span>
         <div class="relative">
-          <img src="${lvl.imgurUrl || 'https://via.placeholder.com/150'}" class="w-16 h-12 object-cover rounded-lg border border-white/10" alt="${lvl.name}">
+          <img src="${lvl.imgurUrl || ''}" class="w-16 h-12 object-cover rounded-lg border border-white/10" alt="${lvl.name}">
           ${faceUrl ? `<img src="${faceUrl}" class="w-6 h-6 absolute -bottom-1 -right-1 drop-shadow-md" title="${lvl.difficulty}">` : ''}
         </div>
         <div>
