@@ -14,8 +14,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Configuración Discord OAuth2
+const DISCORD_CLIENT_ID = "1234567890123456789"; // <--- CAMBIA ESTO POR TU CLIENT ID REAL DE DISCORD
+const REDIRECT_URI = encodeURIComponent("https://mexiballinc-cyber.github.io/Dash-list/");
+const AUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify`;
+
 document.addEventListener('DOMContentLoaded', () => {
   updateUIImages();
+  checkDiscordAuth();
 
   // Escuchar cambio de tema global desde Discord
   const themeRef = ref(db, 'settings/config/currentSeason');
@@ -25,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
       updateUIImages();
       refreshActiveTab();
     }
+  });
+
+  // Login Discord
+  const discordLoginBtn = document.getElementById('discordLoginBtn');
+  discordLoginBtn?.addEventListener('click', () => {
+    window.location.href = AUTH_URL;
   });
 
   // Menú Lateral
@@ -181,6 +193,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
   refreshActiveTab();
 });
+
+function checkDiscordAuth() {
+  const fragment = new URLSearchParams(window.location.hash.slice(1));
+  const accessToken = fragment.get('access_token') || localStorage.getItem('discord_token');
+
+  if (accessToken) {
+    const tokenType = fragment.get('token_type') || 'Bearer';
+    localStorage.setItem('discord_token', accessToken);
+
+    if (window.location.hash) {
+      window.history.replaceState(null, null, window.location.pathname);
+    }
+
+    fetch('https://discord.com/api/users/@me', {
+      headers: { authorization: `${tokenType} ${accessToken}` },
+    })
+    .then(res => res.json())
+    .then(response => {
+      if (response.id) {
+        document.getElementById('discordLoginBtn')?.classList.add('hidden');
+        document.getElementById('userInfo')?.classList.remove('hidden');
+
+        const userName = document.getElementById('userName');
+        const userId = document.getElementById('userId');
+        const userAvatar = document.getElementById('userAvatar');
+
+        if (userName) userName.textContent = response.username;
+        if (userId) userId.textContent = `ID: ${response.id}`;
+        if (userAvatar) {
+          userAvatar.src = response.avatar 
+            ? `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`
+            : `https://cdn.discordapp.com/embed/avatars/0.png`;
+        }
+
+        const recordPlayer = document.getElementById('recordPlayer');
+        if (recordPlayer) recordPlayer.value = response.username;
+      } else {
+        localStorage.removeItem('discord_token');
+      }
+    })
+    .catch(() => localStorage.removeItem('discord_token'));
+  }
+}
 
 function updateUIImages() {
   if (typeof getActivePack !== 'function') return;
