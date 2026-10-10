@@ -6,24 +6,24 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.light-theme .glass-nav {
+body.light-theme .glass-nav {
   background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
 }
 
-/* Bordes laterales dinámicos fijados a la pantalla (z-index por debajo del header) */
+/* Bordes laterales dinámicos fijados a la pantalla */
 .border-side {
   position: fixed;
   top: 0;
   bottom: 0;
   height: 100vh;
   pointer-events: none;
-  z-index: 10; /* Queda detrás del header que tiene z-40 */
+  z-index: 10;
   background-repeat: no-repeat;
   transition: background-image 0.3s ease;
 }
 
-/* En pantalla Horizontal (PC o celular acostado) */
 @media (orientation: landscape) {
   #borderLeft {
     left: 0;
@@ -31,6 +31,7 @@
     background-position: left center;
     background-size: 100% 100%;
   }
+
   #borderRight {
     right: 0;
     width: 18vw;
@@ -39,7 +40,6 @@
   }
 }
 
-/* En pantalla Vertical (Celular de pie) */
 @media (orientation: portrait) {
   #borderLeft {
     left: 0;
@@ -47,6 +47,7 @@
     background-position: left center;
     background-size: 100% 100%;
   }
+
   #borderRight {
     right: 0;
     width: 22vw;
@@ -55,7 +56,6 @@
   }
 }
 
-/* Transición general y soporte para Modo Claro */
 body {
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
@@ -66,22 +66,201 @@ body.light-theme {
   color: #18181b !important;
 }
 
-/* Panel Lateral Adaptable al Modo Claro */
 body.light-theme #sideMenu {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  border-left-color: rgba(0, 0, 0, 0.1) !important;
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  border-left-color: rgba(15, 23, 42, 0.12) !important;
   color: #18181b !important;
 }
 
-body.light-theme #sideMenu button {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-  color: #18181b !important;
+body.light-theme #sideMenu button,
+body.light-theme #sideMenu a {
+  color: #111827 !important;
 }
 
 body.light-theme #sideMenu button:hover {
-  background-color: rgba(0, 0, 0, 0.1) !important;
+  background-color: rgba(15, 23, 42, 0.06) !important;
 }
 
 body.light-theme #sideMenu div {
-  border-color: rgba(0, 0, 0, 0.1) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.light-theme .text-white,
+body.light-theme .text-zinc-300,
+body.light-theme .text-zinc-400,
+body.light-theme .text-zinc-500,
+body.light-theme .text-zinc-600,
+body.light-theme .text-zinc-700 {
+  color: #1f2937 !important;
+}
+
+body.light-theme .bg-white\/5,
+body.light-theme .bg-white\/10,
+body.light-theme .bg-zinc-900\/90,
+body.light-theme .bg-zinc-900\/80,
+body.light-theme .bg-zinc-900,
+body.light-theme .bg-zinc-800,
+body.light-theme .bg-zinc-800\/80,
+body.light-theme .bg-slate-900,
+body.light-theme .bg-slate-900\/80 {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+}
+
+body.light-theme input,
+body.light-theme select,
+body.light-theme textarea {
+  background-color: rgba(255, 255, 255, 0.82) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+  color: #0f172a !important;
+}
+
+body.light-theme input::placeholder,
+body.light-theme select::placeholder,
+body.light-theme textarea::placeholder {
+  color: rgba(15, 23, 42, 0.55) !important;
+}
+
+body.light-theme .border-white\/10,
+body.light-theme .border-zinc-700,
+body.light-theme .border-zinc-600,
+body.light-theme .border-zinc-800,
+body.light-theme .border-white\/5 {
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.light-theme .bg-indigo-600,
+body.light-theme .bg-indigo-500,
+body.light-theme .shadow-indigo-600\/30 {
+  box-shadow: none !important;
+}
+
+body.light-theme .bg-indigo-600:hover,
+body.light-theme .bg-indigo-500:hover {
+  filter: brightness(0.96);
+}
+
+body.light-theme #userProfile,
+body.light-theme #submitModal > div,
+body.light-theme #addLevelModal > div,
+body.light-theme .glass-nav {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+}
+
+body.light-theme #submitModal,
+body.light-theme #addLevelModal {
+  background: rgba(17, 24, 39, 0.22) !important;
+}
+
+body.light-theme .text-zinc-400,
+body.light-theme .text-zinc-500,
+body.light-theme .text-zinc-300 {
+  color: rgba(15, 23, 42, 0.7) !important;
+}
+
+body.light-theme .bg-indigo-500\/20,
+body.light-theme .bg-indigo-600\/20 {
+  background: rgba(99, 102, 241, 0.12) !important;
+}
+
+body.light-theme .text-indigo-300,
+body.light-theme .text-indigo-400 {
+  color: #4f46e5 !important;
+}
+
+body.light-theme .shadow-lg {
+  box-shadow: 0 10px 20px rgba(79, 70, 229, 0.12) !important;
+}
+
+body.light-theme #btnTabLista,
+body.light-theme #btnTabLeaderboard {
+  color: #ffffff !important;
+}
+
+body.light-theme #btnTabLeaderboard {
+  color: rgba(15, 23, 42, 0.7) !important;
+}
+
+body.light-theme #btnTabLeaderboard:hover {
+  color: #111827 !important;
+}
+
+body.light-theme .text-zinc-400.font-mono,
+body.light-theme #userId {
+  color: rgba(15, 23, 42, 0.7) !important;
+}
+
+body.light-theme #themeToggleBtn,
+body.light-theme #menuToggleBtn,
+body.light-theme #openSubmitModalBtn,
+body.light-theme #closeSubmitModalBtn,
+body.light-theme #closeAddLevelModalBtn {
+  color: #111827 !important;
+}
+
+body.light-theme #themeToggleBtn,
+body.light-theme #menuToggleBtn {
+  background: rgba(15, 23, 42, 0.05) !important;
+}
+
+body.light-theme .bg-red-500\/10,
+body.light-theme .border-red-500\/20 {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+body.light-theme .text-red-400 {
+  color: #dc2626 !important;
+}
+
+body.light-theme .hover\:text-white:hover,
+body.light-theme a:hover {
+  color: #111827 !important;
+}
+
+body.light-theme .text-zinc-500.font-semibold,
+body.light-theme .font-bold.text-white {
+  color: #111827 !important;
+}
+
+body.light-theme .bg-black\/60,
+body.light-theme .bg-black\/80 {
+  background-color: rgba(0, 0, 0, 0.28) !important;
+}
+
+body.light-theme .border-indigo-500\/30,
+body.light-theme .border-indigo-500\/50 {
+  border-color: rgba(79, 70, 229, 0.22) !important;
+}
+
+body.light-theme .bg-indigo-500\/20 {
+  background-color: rgba(79, 70, 229, 0.10) !important;
+}
+
+body.light-theme .text-zinc-100 {
+  color: #111827 !important;
+}
+
+body.light-theme .user-card {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(15, 23, 42, 0.12) !important;
+}
+
+body.light-theme .user-card * {
+  color: #111827 !important;
+}
+
+body.light-theme .text-zinc-200 {
+  color: #0f172a !important;
+}
+
+body.light-theme .bg-zinc-950 {
+  background: rgba(255, 255, 255, 0.9) !important;
+}
+
+body.light-theme .bg-zinc-950\/60 {
+  background: rgba(255, 255, 255, 0.8) !important;
+}
+
+body.light-theme .ring-white\/10 {
+  box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.12) !important;
 }
