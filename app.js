@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { saveDiscordUserToFirebase, fetchPlayersFromFirebase } from "./players.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAMnhmifHanGHh9lwmm-2Xydchim61CfBA",
@@ -14,7 +15,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Configuración Discord OAuth2
 const DISCORD_CLIENT_ID = "1557609625904357436";
 const REDIRECT_URI = "https://mexiballinc-cyber.github.io/Dash-list/";
 const AUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&response_type=token&scope=identify`;
@@ -23,7 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateUIImages();
   checkDiscordAuth();
 
-  // Escuchar cambio de tema global desde Discord
   const themeRef = ref(db, 'settings/config/currentSeason');
   onValue(themeRef, (snapshot) => {
     if (snapshot.exists() && typeof setSeason === 'function') {
@@ -33,13 +32,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Login Discord
   const discordLoginBtn = document.getElementById('discordLoginBtn');
   discordLoginBtn?.addEventListener('click', () => {
     window.location.href = AUTH_URL;
   });
 
-  // Menú Lateral
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
   const menuOverlay = document.getElementById('menuOverlay');
@@ -59,12 +56,11 @@ document.addEventListener('DOMContentLoaded', () => {
   closeMenuBtn?.addEventListener('click', closeMenu);
   menuOverlay?.addEventListener('click', closeMenu);
 
-  // Toggle Tema Sol / Luna
   const themeToggleBtn = document.getElementById('themeToggleBtn');
   themeToggleBtn?.addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');
     document.body.classList.toggle('light-theme');
-    
+
     const sunIcon = document.getElementById('sunIcon');
     const moonIcon = document.getElementById('moonIcon');
     if (sunIcon && moonIcon) {
@@ -74,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
     updateUIImages();
   });
 
-  // Modales
   const submitModal = document.getElementById('submitModal');
   const openSubmitModalBtn = document.getElementById('openSubmitModalBtn');
   const navSubmitRecordBtn = document.getElementById('navSubmitRecordBtn');
@@ -94,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
   submitModal?.addEventListener('click', (e) => { if (e.target === submitModal) submitModal?.classList.add('hidden'); });
   addLevelModal?.addEventListener('click', (e) => { if (e.target === addLevelModal) addLevelModal?.classList.add('hidden'); });
 
-  // Formulario: Enviar Nivel a Firebase
   const addLevelForm = document.getElementById('addLevelForm');
   addLevelForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -127,13 +121,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Formulario: Enviar Récord a Firebase
   const recordForm = document.getElementById('recordForm');
   recordForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const data = {
       levelName: document.getElementById('recordLevel').value,
       playerName: document.getElementById('recordPlayer').value,
+      userId: localStorage.getItem('discord_user_id') || null,
       progress: parseInt(document.getElementById('recordProgress').value),
       videoUrl: document.getElementById('recordVideo').value,
       country: document.getElementById('recordCountry').value || 'N/A',
@@ -154,7 +148,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // Pestañas
   const btnTabLista = document.getElementById('btnTabLista');
   const btnTabLeaderboard = document.getElementById('btnTabLeaderboard');
   const levelsContainer = document.getElementById('levelsContainer');
@@ -170,10 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         populateRecordSelect(levels);
       });
     } else {
-      const lbRef = ref(db, 'leaderboard');
-      onValue(lbRef, (snapshot) => {
-        renderLeaderboard(snapshot.val() || {}, levelsContainer);
-      });
+      renderLeaderboardFromFirebase(levelsContainer);
     }
   }
 
@@ -198,43 +188,53 @@ function checkDiscordAuth() {
   const fragment = new URLSearchParams(window.location.hash.slice(1));
   const accessToken = fragment.get('access_token') || localStorage.getItem('discord_token');
 
-  if (accessToken) {
-    const tokenType = fragment.get('token_type') || 'Bearer';
-    localStorage.setItem('discord_token', accessToken);
+  if (!accessToken) return;
 
-    if (window.location.hash) {
-      window.history.replaceState(null, null, window.location.pathname);
-    }
+  const tokenType = fragment.get('token_type') || 'Bearer';
+  localStorage.setItem('discord_token', accessToken);
 
-    fetch('https://discord.com/api/users/@me', {
-      headers: { authorization: `${tokenType} ${accessToken}` },
-    })
+  if (window.location.hash) {
+    window.history.replaceState(null, null, window.location.pathname);
+  }
+
+  fetch('https://discord.com/api/users/@me', {
+    headers: { authorization: `${tokenType} ${accessToken}` },
+  })
     .then(res => res.json())
-    .then(response => {
-      if (response.id) {
-        document.getElementById('discordLoginBtn')?.classList.add('hidden');
-        document.getElementById('userInfo')?.classList.remove('hidden');
-
-        const userName = document.getElementById('userName');
-        const userId = document.getElementById('userId');
-        const userAvatar = document.getElementById('userAvatar');
-
-        if (userName) userName.textContent = response.username;
-        if (userId) userId.textContent = `ID: ${response.id}`;
-        if (userAvatar) {
-          userAvatar.src = response.avatar 
-            ? `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`
-            : `https://cdn.discordapp.com/embed/avatars/0.png`;
-        }
-
-        const recordPlayer = document.getElementById('recordPlayer');
-        if (recordPlayer) recordPlayer.value = response.username;
-      } else {
+    .then(async (response) => {
+      if (!response.id) {
         localStorage.removeItem('discord_token');
+        return;
+      }
+
+      document.getElementById('discordLoginBtn')?.classList.add('hidden');
+      document.getElementById('userInfo')?.classList.remove('hidden');
+
+      const userName = document.getElementById('userName');
+      const userId = document.getElementById('userId');
+      const userAvatar = document.getElementById('userAvatar');
+
+      if (userName) userName.textContent = response.username;
+      if (userId) userId.textContent = `ID: ${response.id}`;
+      if (userAvatar) {
+        userAvatar.src = response.avatar
+          ? `https://cdn.discordapp.com/avatars/${response.id}/${response.avatar}.png`
+          : `https://cdn.discordapp.com/embed/avatars/0.png`;
+      }
+
+      const recordPlayer = document.getElementById('recordPlayer');
+      if (recordPlayer) recordPlayer.value = response.username;
+
+      localStorage.setItem('discord_user_id', response.id);
+      localStorage.setItem('discord_username', response.username);
+
+      try {
+        await saveDiscordUserToFirebase(response);
+      } catch (error) {
+        console.error('❌ Error guardando usuario en Firebase:', error);
       }
     })
     .catch(() => localStorage.removeItem('discord_token'));
-  }
 }
 
 function updateUIImages() {
@@ -269,7 +269,7 @@ function populateRecordSelect(levelsData) {
     return;
   }
 
-  levels.forEach(lvl => {
+  levels.forEach((lvl) => {
     const opt = document.createElement('option');
     opt.value = lvl.name;
     opt.textContent = lvl.name;
@@ -277,37 +277,44 @@ function populateRecordSelect(levelsData) {
   });
 }
 
-function renderLeaderboard(data, container) {
+async function renderLeaderboardFromFirebase(container) {
   if (!container) return;
-  container.innerHTML = '';
+  container.innerHTML = '<p class="text-center text-zinc-500 py-8">Cargando leaderboard...</p>';
 
-  const players = Object.values(data).sort((a, b) => (b.points || 0) - (a.points || 0));
+  try {
+    const players = await fetchPlayersFromFirebase();
 
-  if (players.length === 0) {
-    container.innerHTML = `<p class="text-center text-zinc-500 py-8">Aún no hay jugadores en la Leaderboard.</p>`;
-    return;
-  }
+    if (!players || players.length === 0) {
+      container.innerHTML = '<p class="text-center text-zinc-500 py-8">Aún no hay jugadores en la Leaderboard.</p>';
+      return;
+    }
 
-  players.forEach((player, index) => {
-    const card = document.createElement('div');
-    card.className = "glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-2 transition hover:border-indigo-500/50";
-    card.innerHTML = `
-      <div class="flex items-center gap-3">
-        <span class="font-bold text-lg ${index === 0 ? 'text-amber-400' : 'text-indigo-400'}">#${index + 1}</span>
-        <div>
-          <h3 class="font-bold text-white text-base">${player.name}</h3>
-          <p class="text-xs text-zinc-400">
-            Creados: <span class="text-white font-semibold">${player.createdCount || 0}</span> | 
-            Verificados: <span class="text-white font-semibold">${player.verifiedCount || 0}</span>
-          </p>
+    container.innerHTML = '';
+
+    players.forEach((player, index) => {
+      const card = document.createElement('div');
+      card.className = 'glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-2 transition hover:border-indigo-500/50';
+      card.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="font-bold text-lg ${index === 0 ? 'text-amber-400' : 'text-indigo-400'}">#${index + 1}</span>
+          <div>
+            <h3 class="font-bold text-white text-base">${player.name}</h3>
+            <p class="text-xs text-zinc-400">
+              Creados: <span class="text-white font-semibold">${player.createdCount || 0}</span> |
+              Verificados: <span class="text-white font-semibold">${player.verifiedCount || 0}</span>
+            </p>
+          </div>
         </div>
-      </div>
-      <div class="text-right">
-        <span class="font-extrabold text-lg text-indigo-400">${player.points || 0} pts</span>
-      </div>
-    `;
-    container.appendChild(card);
-  });
+        <div class="text-right">
+          <span class="font-extrabold text-lg text-indigo-400">${player.points || 0} pts</span>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  } catch (error) {
+    console.error('❌ Error renderizando leaderboard:', error);
+    container.innerHTML = '<p class="text-center text-red-500 py-8">Error al cargar leaderboard.</p>';
+  }
 }
 
 function renderLevels(data, container) {
@@ -317,7 +324,7 @@ function renderLevels(data, container) {
   const levels = Object.values(data);
 
   if (levels.length === 0) {
-    container.innerHTML = `<p class="text-center text-zinc-500 py-8">No hay niveles en la lista todavía.</p>`;
+    container.innerHTML = '<p class="text-center text-zinc-500 py-8">No hay niveles en la lista todavía.</p>';
     return;
   }
 
@@ -328,7 +335,7 @@ function renderLevels(data, container) {
     const faceUrl = activePack[diffKey] || activePack.demon || '';
 
     const card = document.createElement('div');
-    card.className = "glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-3 shadow-lg transition hover:border-indigo-500/50";
+    card.className = 'glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-3 shadow-lg transition hover:border-indigo-500/50';
     card.innerHTML = `
       <div class="flex items-center gap-4">
         <span class="font-black text-xl text-indigo-400">#${index + 1}</span>
