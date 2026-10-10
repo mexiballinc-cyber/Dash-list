@@ -14,8 +14,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Configuración Discord OAuth2
-const DISCORD_CLIENT_ID = "1234567890123456789"; // <--- CAMBIA ESTO POR TU CLIENT ID REAL DE DISCORD
+// Configuración Discord OAuth2 con tu ID real
+const DISCORD_CLIENT_ID = "1557609625904357436"; 
 const REDIRECT_URI = encodeURIComponent("https://mexiballinc-cyber.github.io/Dash-list/");
 const AUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=token&scope=identify`;
 
