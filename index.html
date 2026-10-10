@@ -76,7 +76,7 @@
         </button>
 
         <div id="userInfo" class="hidden flex items-center gap-3">
-          <img id="userAvatar" src="" class="w-10 h-10 rounded-full border border-indigo-500" />
+          <img id="userAvatar" src="" class="w-10 h-10 rounded-full border border-indigo-500 object-cover" />
           <div class="overflow-hidden">
             <p id="userName" class="font-bold text-sm text-white truncate"></p>
             <p id="userId" class="text-xs text-zinc-400 font-mono"></p>
@@ -97,17 +97,15 @@
       </nav>
     </div>
 
-    <!-- Enlaces Inferiores -->
+    <!-- Enlaces Inferiores Solicitados -->
     <div class="pt-4 border-t border-white/10 flex items-center justify-around text-xs text-zinc-400 mt-6">
-      <a href="#" class="hover:text-white transition">Discord</a>
-      <a href="#" class="hover:text-white transition">YouTube</a>
-      <a href="#" class="hover:text-white transition">X (Twitter)</a>
+      <a href="https://discord.gg/efZqW2rhn5" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-400 transition font-bold">Discord</a>
+      <a href="https://www.tiktok.com/@dash_list?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" class="hover:text-pink-400 transition font-bold">TikTok</a>
     </div>
   </aside>
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="pt-24 pb-16 px-4 max-w-4xl mx-auto z-20 relative">
-    <!-- Selector Lista / Leaderboard -->
     <div class="flex items-center justify-center mb-8">
       <div class="glass-nav p-1 rounded-2xl flex gap-1 border border-white/10">
         <button id="btnTabLista" class="px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition">Lista</button>
@@ -115,7 +113,6 @@
       </div>
     </div>
 
-    <!-- Contenedor para renderizar Cápsulas Glassmorphism -->
     <div id="levelsContainer" class="space-y-3">
       <!-- Los niveles se cargan aquí -->
     </div>
@@ -125,7 +122,7 @@
   <div id="submitModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="glass-nav max-w-md w-full p-6 rounded-2xl border border-white/10 shadow-2xl relative">
       <button id="closeSubmitModalBtn" class="absolute top-4 right-4 text-zinc-400 hover:text-white text-xl">✕</button>
-      <h2 class="text-xl font-bold text-center mb-4 text-white">Submit Record</h2>
+      <h2 class="text-xl font-bold text-center mb-4 text-white">Enviar Récord</h2>
       
       <form id="recordForm" class="space-y-3">
         <div>
