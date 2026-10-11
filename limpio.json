@@ -1,5 +1,116 @@
 {
-  "niveles": {},
-  "solicitudes": {},
-  "jugadores": {}
+  "leaderboard": {
+    "1161557418073931807": {
+      "avatar": "https://cdn.discordapp.com/avatars/1161557418073931807/941d820e5729e21566324d099a648f9d.png",
+      "country": "N/A",
+      "createdAt": 1791607265272,
+      "createdCount": 0,
+      "discordId": "1161557418073931807",
+      "lastLogin": 1791749610964,
+      "name": "mr_chulin._.2",
+      "points": 0,
+      "verifiedCount": 0
+    },
+    "1245487976495058985": {
+      "avatar": "https://cdn.discordapp.com/avatars/1245487976495058985/ddac13d2c1f831576f802221d9c45dd7.png",
+      "country": "N/A",
+      "createdAt": 1791671098089,
+      "createdCount": 0,
+      "discordId": "1245487976495058985",
+      "lastLogin": 1791691215010,
+      "name": "chulin2",
+      "points": 0,
+      "verifiedCount": 0
+    },
+    "1415798194419536005": {
+      "avatar": "https://cdn.discordapp.com/avatars/1415798194419536005/9898e179fa33d5a317d6bae3ee980f73.png",
+      "country": "Peru es clave",
+      "createdAt": 1791607984569,
+      "createdCount": 0,
+      "discordId": "1415798194419536005",
+      "lastLogin": 1791704107181,
+      "name": "legna1627",
+      "points": 100,
+      "verifiedCount": 0
+    },
+    "Legna1627 ": {
+      "name": "User_Legna1627 ",
+      "verifiedCount": 2
+    },
+    "legna1627 ": {
+      "createdCount": 2,
+      "name": "User_legna1627 "
+    }
+  },
+  "levels": {
+    "-P3df4PVTu7sATnDKQEn": {
+      "createdAt": 1791700522697,
+      "creatorId": "legna1627 ",
+      "difficulty": "harder",
+      "duration": "35s",
+      "gdId": "149663755",
+      "imgurUrl": "https://cdn.discordapp.com/attachments/1416161731515781226/1558625733805473822/16_sin_titulo_20260929181920.png?ex=6acc1ed4&is=6acacd54&hm=4ed131ab3ebbaa62a7c0e3d2d11c9054fb40585ab75405310517a60af42bbb7d&",
+      "name": "Challenge wave ",
+      "notified": true,
+      "objects": "1718",
+      "showcaseUrl": "https://youtu.be/mjMNtLxgoDk?si=7zN21Y9hOE5aPrJt",
+      "song": "Shiawase ",
+      "verificationUrl": "https://youtu.be/HNUdIOCWBGs?si=KPfS2a__syokab1V",
+      "verifierId": "Legna1627 "
+    },
+    "-P3drCLhOKWanbGNBwgT": {
+      "createdAt": 1791703700950,
+      "creatorId": "legna1627 ",
+      "difficulty": "harder",
+      "duration": "48s",
+      "gdId": "146066189",
+      "imgurUrl": "https://cdn.discordapp.com/attachments/1472273636110106714/1558742431632064592/35_sin_titulo_20261011002545.png?ex=6acc8b83&is=6acb3a03&hm=513ed1ff829b933d00e5470ef68bd5d9294f20f224d66f67bca3eae890b0a2da&",
+      "name": "Red eclipse ",
+      "notified": true,
+      "objects": "1607",
+      "showcaseUrl": "https://youtu.be/5klLpTpoh4s?si=xgQwPRYrFfvo9mzL",
+      "song": "At the speed of light",
+      "verificationUrl": "https://youtu.be/5klLpTpoh4s?si=xgQwPRYrFfvo9mzL",
+      "verifierId": "Legna1627 "
+    }
+  },
+  "settings": {
+    "channels": {
+      "levelsChannelId": "1558729057112428544",
+      "recordsChannelId": "1558637140404076634",
+      "updatedAt": 1791700394910,
+      "updatedBy": "mr_chulin._.2"
+    },
+    "config": {
+      "currentSeason": "otono",
+      "updatedAt": 1791701442087,
+      "updatedBy": "mr_chulin._.2"
+    }
+  },
+  "users": {
+    "1161557418073931807": {
+      "avatar": "https://cdn.discordapp.com/avatars/1161557418073931807/941d820e5729e21566324d099a648f9d.png",
+      "discordId": "1161557418073931807",
+      "discriminator": "0",
+      "lastLogin": 1791749610474,
+      "registeredAt": 1791749610474,
+      "username": "mr_chulin._.2"
+    },
+    "1245487976495058985": {
+      "avatar": "https://cdn.discordapp.com/avatars/1245487976495058985/ddac13d2c1f831576f802221d9c45dd7.png",
+      "discordId": "1245487976495058985",
+      "discriminator": "0",
+      "lastLogin": 1791691214653,
+      "registeredAt": 1791691214653,
+      "username": "chulin2"
+    },
+    "1415798194419536005": {
+      "avatar": "https://cdn.discordapp.com/avatars/1415798194419536005/9898e179fa33d5a317d6bae3ee980f73.png",
+      "discordId": "1415798194419536005",
+      "discriminator": "0",
+      "lastLogin": 1791704106994,
+      "registeredAt": 1791704106994,
+      "username": "legna1627"
+    }
+  }
 }
