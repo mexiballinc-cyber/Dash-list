@@ -33,24 +33,21 @@
   <header class="fixed top-4 left-1/2 -translate-x-1/2 w-[92%] max-w-5xl z-40 glass-nav rounded-2xl px-5 py-3 flex items-center justify-between shadow-2xl">
     <!-- Logo Principal -->
     <div class="flex items-center gap-3">
-      <img id="mainLogo" src="" alt="DashList Logo" class="h-7 w-auto object-contain transition-all">
+      <img id="mainLogo" src="" alt="DashList Logo" class="h-7 w-auto object-contain transition-all cursor-pointer">
     </div>
 
     <!-- Botones de Acción Superiores -->
     <div class="flex items-center gap-2 sm:gap-3">
-      <!-- Theme Switch (Sol / Luna) -->
       <button id="themeToggleBtn" aria-label="Cambiar Tema" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition">
         <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
       </button>
 
-      <!-- Botón Submit Record -->
       <button id="openSubmitModalBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-sm transition shadow-lg shadow-indigo-600/30 flex items-center gap-1.5">
         <span class="text-base">+</span>
         <span class="hidden sm:inline">Enviar Récord</span>
       </button>
 
-      <!-- Botón Menú Hamburguesa -->
       <button id="menuToggleBtn" aria-label="Abrir Menú" class="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
       </button>
@@ -60,15 +57,13 @@
   <!-- MENÚ LATERAL (PANEL DESLIZANTE) -->
   <aside id="sideMenu" class="fixed top-0 right-0 h-full w-80 max-w-[85vw] glass-nav border-l border-white/10 z-50 transform translate-x-full transition-transform duration-300 ease-in-out p-6 flex flex-col justify-between shadow-2xl overflow-y-auto">
     <div>
-      <!-- Cabecera del Panel -->
       <div class="flex items-center justify-between pb-4 mb-6 border-b border-white/10">
         <h2 class="font-bold text-lg text-white">Menú</h2>
         <button id="closeMenuBtn" class="flex items-center gap-2 text-xs bg-red-500/10 hover:bg-red-500/20 text-red-400 font-semibold px-3 py-1.5 rounded-lg border border-red-500/20 transition">
-          ✕ Volver a la lista
+          ✕ Cerrar
         </button>
       </div>
 
-      <!-- Perfil de Usuario (Discord Auth + Cerrar Sesión) -->
       <div id="userProfile" class="mb-6 p-4 rounded-xl bg-white/5 border border-white/10">
         <button id="discordLoginBtn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition text-sm">
           <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 2.98.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-2.981.076.076 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
@@ -89,7 +84,6 @@
         </div>
       </div>
 
-      <!-- Opciones del Menú -->
       <nav class="space-y-2">
         <button id="navSubmitRecordBtn" class="w-full text-left p-3 rounded-xl bg-white/5 hover:bg-white/10 text-sm font-medium transition flex items-center justify-between">
           <span>Enviar Récord</span>
@@ -102,7 +96,6 @@
       </nav>
     </div>
 
-    <!-- Enlaces Inferiores Solicitados -->
     <div class="pt-4 border-t border-white/10 flex items-center justify-around text-xs text-zinc-400 mt-6">
       <a href="https://discord.gg/efZqW2rhn5" target="_blank" rel="noopener noreferrer" class="hover:text-indigo-400 transition font-bold">Discord</a>
       <a href="https://www.tiktok.com/@dash_list?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" class="hover:text-pink-400 transition font-bold">TikTok</a>
@@ -111,16 +104,45 @@
 
   <!-- CONTENIDO PRINCIPAL -->
   <main class="pt-24 pb-16 px-4 max-w-4xl mx-auto z-20 relative">
-    <div class="flex items-center justify-center mb-8">
+    
+    <!-- CONMUTADOR LISTA / LEADERBOARD -->
+    <div class="flex flex-col items-center justify-center mb-6 gap-4">
       <div class="glass-nav p-1 rounded-2xl flex gap-1 border border-white/10">
         <button id="btnTabLista" class="px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition">Lista</button>
         <button id="btnTabLeaderboard" class="px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition">Leaderboard</button>
       </div>
+
+      <!-- BARRA DE BÚSQUEDA DINÁMICA -->
+      <div id="searchContainer" class="w-full max-w-md">
+        <input type="text" id="searchInput" placeholder="🔍 Buscar niveles..." class="w-full bg-zinc-900/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-indigo-500 transition shadow-inner" />
+      </div>
     </div>
 
+    <!-- CONTENEDOR PRINCIPAL DE LISTAS -->
     <div id="levelsContainer" class="space-y-3">
-      <!-- Los niveles se cargan aquí -->
+      <!-- Se llena dinámicamente -->
     </div>
+
+    <!-- VISTA DE DETALLE DE NIVEL (OCULTA POR DEFECTO) -->
+    <div id="levelDetailView" class="hidden space-y-6">
+      <button id="btnBackToList" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-bold text-sm transition flex items-center gap-2 border border-white/10">
+        ← Volver a la Lista
+      </button>
+      <div id="levelDetailContent" class="glass-nav p-6 rounded-2xl border border-white/10 shadow-2xl">
+        <!-- Contenido generado por JavaScript -->
+      </div>
+    </div>
+
+    <!-- VISTA DE DETALLE DE JUGADOR (OCULTA POR DEFECTO) -->
+    <div id="playerDetailView" class="hidden space-y-6">
+      <button id="btnBackToLeaderboard" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white font-bold text-sm transition flex items-center gap-2 border border-white/10">
+        ← Volver a la Leaderboard
+      </button>
+      <div id="playerDetailContent" class="glass-nav p-6 rounded-2xl border border-white/10 shadow-2xl">
+        <!-- Contenido generado por JavaScript -->
+      </div>
+    </div>
+
   </main>
 
   <!-- MODAL DE SUBMIT RECORD -->
