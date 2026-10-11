@@ -37,6 +37,19 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = AUTH_URL;
   });
 
+  // Botón para Cerrar Sesión
+  const logoutBtn = document.getElementById('logoutBtn');
+  logoutBtn?.addEventListener('click', () => {
+    localStorage.removeItem('discord_token');
+    localStorage.removeItem('discord_user_id');
+    localStorage.removeItem('discord_username');
+    document.getElementById('userInfo')?.classList.add('hidden');
+    document.getElementById('discordLoginBtn')?.classList.remove('hidden');
+    window.location.hash = '';
+    const recordPlayer = document.getElementById('recordPlayer');
+    if (recordPlayer) recordPlayer.value = '';
+  });
+
   const menuToggleBtn = document.getElementById('menuToggleBtn');
   const closeMenuBtn = document.getElementById('closeMenuBtn');
   const menuOverlay = document.getElementById('menuOverlay');
