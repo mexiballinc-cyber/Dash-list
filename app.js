@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { saveDiscordUserToFirebase, fetchPlayersFromFirebase } from "./players.js";
 
 const firebaseConfig = {
@@ -23,7 +23,6 @@ let globalLevelsCache = {};
 let globalPlayersCache = [];
 let currentTab = 'lista';
 
-// Función para calcular puntos de un nivel según su posición en la lista (#1 = 100pts)
 function getPointsForRank(rank, totalLevels) {
   if (rank <= 0) return 0;
   const maxPoints = 100;
@@ -31,6 +30,15 @@ function getPointsForRank(rank, totalLevels) {
   if (totalLevels <= 1) return maxPoints;
   const step = (maxPoints - minPoints) / (totalLevels - 1);
   return Math.round(maxPoints - step * (rank - 1));
+}
+
+// Calcular promedio de calificación (1 - 100)
+function calculateAverageRating(ratings) {
+  if (!ratings) return null;
+  const values = Object.values(ratings);
+  if (values.length === 0) return null;
+  const sum = values.reduce((acc, curr) => acc + Number(curr), 0);
+  return (sum / values.length).toFixed(1);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -46,14 +54,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  const mainLogo = document.getElementById('mainLogo');
-  mainLogo?.addEventListener('click', showMainList);
+  document.getElementById('mainLogo')?.addEventListener('click', showMainList);
+  document.getElementById('discordLoginBtn')?.addEventListener('click', () => { window.location.href = AUTH_URL; });
 
-  const discordLoginBtn = document.getElementById('discordLoginBtn');
-  discordLoginBtn?.addEventListener('click', () => { window.location.href = AUTH_URL; });
-
-  const logoutBtn = document.getElementById('logoutBtn');
-  logoutBtn?.addEventListener('click', () => {
+  document.getElementById('logoutBtn')?.addEventListener('click', () => {
     localStorage.removeItem('discord_token');
     localStorage.removeItem('discord_user_id');
     localStorage.removeItem('discord_username');
@@ -76,34 +80,23 @@ document.addEventListener('DOMContentLoaded', () => {
   closeMenuBtn?.addEventListener('click', closeMenu);
   menuOverlay?.addEventListener('click', closeMenu);
 
-  const themeToggleBtn = document.getElementById('themeToggleBtn');
-  themeToggleBtn?.addEventListener('click', () => {
+  document.getElementById('themeToggleBtn')?.addEventListener('click', () => {
     document.documentElement.classList.toggle('dark');
     document.body.classList.toggle('light-theme');
-    const sunIcon = document.getElementById('sunIcon');
-    const moonIcon = document.getElementById('moonIcon');
-    if (sunIcon && moonIcon) {
-      sunIcon.classList.toggle('hidden');
-      moonIcon.classList.toggle('hidden');
-    }
+    document.getElementById('sunIcon')?.classList.toggle('hidden');
+    document.getElementById('moonIcon')?.classList.toggle('hidden');
     updateUIImages();
   });
 
   const submitModal = document.getElementById('submitModal');
-  const openSubmitModalBtn = document.getElementById('openSubmitModalBtn');
-  const navSubmitRecordBtn = document.getElementById('navSubmitRecordBtn');
-  const closeSubmitModalBtn = document.getElementById('closeSubmitModalBtn');
-
   const addLevelModal = document.getElementById('addLevelModal');
-  const navAddLevelBtn = document.getElementById('navAddLevelBtn');
-  const closeAddLevelModalBtn = document.getElementById('closeAddLevelModalBtn');
 
-  openSubmitModalBtn?.addEventListener('click', () => { closeMenu(); submitModal?.classList.remove('hidden'); });
-  navSubmitRecordBtn?.addEventListener('click', () => { closeMenu(); submitModal?.classList.remove('hidden'); });
-  closeSubmitModalBtn?.addEventListener('click', () => submitModal?.classList.add('hidden'));
+  document.getElementById('openSubmitModalBtn')?.addEventListener('click', () => { closeMenu(); submitModal?.classList.remove('hidden'); });
+  document.getElementById('navSubmitRecordBtn')?.addEventListener('click', () => { closeMenu(); submitModal?.classList.remove('hidden'); });
+  document.getElementById('closeSubmitModalBtn')?.addEventListener('click', () => submitModal?.classList.add('hidden'));
 
-  navAddLevelBtn?.addEventListener('click', () => { closeMenu(); addLevelModal?.classList.remove('hidden'); });
-  closeAddLevelModalBtn?.addEventListener('click', () => addLevelModal?.classList.add('hidden'));
+  document.getElementById('navAddLevelBtn')?.addEventListener('click', () => { closeMenu(); addLevelModal?.classList.remove('hidden'); });
+  document.getElementById('closeAddLevelModalBtn')?.addEventListener('click', () => addLevelModal?.classList.add('hidden'));
 
   submitModal?.addEventListener('click', (e) => { if (e.target === submitModal) submitModal?.classList.add('hidden'); });
   addLevelModal?.addEventListener('click', (e) => { if (e.target === addLevelModal) addLevelModal?.classList.add('hidden'); });
@@ -119,6 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       gdId: document.getElementById('lvlGdId').value,
       showcaseUrl: document.getElementById('lvlShowcase').value,
       verificationUrl: document.getElementById('lvlVerification').value,
+      rawFootageUrl: document.getElementById('lvlRawFootage').value || '',
       imgurUrl: document.getElementById('lvlImgur').value,
       duration: document.getElementById('lvlDuration').value,
       objects: document.getElementById('lvlObjects').value,
@@ -128,9 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     try {
-      const pendingRef = ref(db, 'pending_levels');
-      const newRef = push(pendingRef);
-      await set(newRef, data);
+      await set(push(ref(db, 'pending_levels')), data);
       alert('¡Nivel enviado a revisión en Discord!');
       addLevelForm.reset();
       addLevelModal?.classList.add('hidden');
@@ -149,15 +141,14 @@ document.addEventListener('DOMContentLoaded', () => {
       userId: localStorage.getItem('discord_user_id') || null,
       progress: parseInt(document.getElementById('recordProgress').value),
       videoUrl: document.getElementById('recordVideo').value,
+      rawFootageUrl: document.getElementById('recordRawFootage').value || '',
       country: document.getElementById('recordCountry').value || 'N/A',
       createdAt: Date.now(),
       notified: false
     };
 
     try {
-      const pendingRef = ref(db, 'pending_records');
-      const newRef = push(pendingRef);
-      await set(newRef, data);
+      await set(push(ref(db, 'pending_records')), data);
       alert('¡Récord enviado a revisión!');
       recordForm.reset();
       submitModal?.classList.add('hidden');
@@ -196,16 +187,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const levelsContainer = document.getElementById('levelsContainer');
 
     if (currentTab === 'lista') {
-      const filtered = Object.values(globalLevelsCache).filter(lvl => 
-        (lvl.name && lvl.name.toLowerCase().includes(query)) ||
-        (lvl.creatorId && lvl.creatorId.toLowerCase().includes(query)) ||
-        (lvl.verifierId && lvl.verifierId.toLowerCase().includes(query))
-      );
+      const filtered = Object.entries(globalLevelsCache)
+        .map(([key, val]) => ({ key, ...val }))
+        .filter(lvl => 
+          (lvl.name && lvl.name.toLowerCase().includes(query)) ||
+          (lvl.creatorId && lvl.creatorId.toLowerCase().includes(query)) ||
+          (lvl.verifierId && lvl.verifierId.toLowerCase().includes(query))
+        );
       renderLevelsList(filtered, levelsContainer);
     } else {
-      const filtered = globalPlayersCache.filter(p => 
-        p.name && p.name.toLowerCase().includes(query)
-      );
+      const filtered = globalPlayersCache.filter(p => p.name && p.name.toLowerCase().includes(query));
       renderLeaderboardList(filtered, levelsContainer);
     }
   });
@@ -226,10 +217,11 @@ function showMainList() {
 function refreshActiveTab() {
   const levelsContainer = document.getElementById('levelsContainer');
   if (currentTab === 'lista') {
-    const lvlRef = ref(db, 'levels');
-    onValue(lvlRef, (snapshot) => {
+    onValue(ref(db, 'levels'), (snapshot) => {
       globalLevelsCache = snapshot.val() || {};
-      renderLevelsList(Object.values(globalLevelsCache), levelsContainer);
+      const levelsArray = Object.entries(globalLevelsCache).map(([key, val]) => ({ key, ...val }));
+      levelsArray.sort((a, b) => (a.order || a.createdAt || 0) - (b.order || b.createdAt || 0));
+      renderLevelsList(levelsArray, levelsContainer);
       populateRecordSelect(globalLevelsCache);
     });
   } else {
@@ -263,6 +255,7 @@ function renderLevelsList(levels, container) {
   levels.forEach((lvl, index) => {
     const diffKey = (lvl.difficulty || 'demon').toLowerCase();
     const faceUrl = activePack[diffKey] || activePack.demon || '';
+    const avgRating = calculateAverageRating(lvl.ratings);
 
     const card = document.createElement('div');
     card.className = 'glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-3 shadow-lg transition hover:border-indigo-500/50 cursor-pointer';
@@ -278,7 +271,8 @@ function renderLevelsList(levels, container) {
           <p class="text-xs text-zinc-400">Por: <span class="text-white font-semibold">${lvl.creatorId}</span> | Verificado: <span class="text-white font-semibold">${lvl.verifierId}</span></p>
         </div>
       </div>
-      <div class="text-right">
+      <div class="text-right flex items-center gap-2">
+        ${avgRating ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">⭐ ${avgRating}/100</span>` : ''}
         <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30 uppercase">${lvl.difficulty}</span>
       </div>
     `;
@@ -345,9 +339,11 @@ function openLevelDetail(lvl, rank) {
 
   const totalLevels = Object.keys(globalLevelsCache).length;
   const levelPoints = getPointsForRank(rank, totalLevels);
-
-  // Obtener récords asociados a este nivel
   const levelRecords = lvl.records ? Object.values(lvl.records) : [];
+
+  const currentUserId = localStorage.getItem('discord_user_id');
+  const userRating = (lvl.ratings && currentUserId && lvl.ratings[currentUserId]) ? lvl.ratings[currentUserId] : '';
+  const avgRating = calculateAverageRating(lvl.ratings);
 
   detailContent.innerHTML = `
     <div class="text-center mb-6">
@@ -362,14 +358,15 @@ function openLevelDetail(lvl, rank) {
     <div class="flex justify-center gap-2 mb-4">
       <button id="btnVideoVerif" class="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-lg transition">Verification</button>
       <button id="btnVideoShowcase" class="px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 hover:text-white transition">Showcase</button>
+      ${lvl.rawFootageUrl ? `<a href="${lvl.rawFootageUrl}" target="_blank" class="px-5 py-2 rounded-xl text-xs font-bold bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white transition border border-red-500/30 flex items-center gap-1">Raw Footage ↗</a>` : ''}
     </div>
 
-    <!-- REPRODUCTOR DE VIDEO EMBEBIDO -->
+    <!-- REPRODUCTOR DE VIDEO -->
     <div class="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black mb-6">
       <iframe id="levelVideoFrame" src="${verificationEmbed}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
     </div>
 
-    <!-- INFORMACIÓN / ESTADÍSTICAS DEL NIVEL -->
+    <!-- ESTADÍSTICAS -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center mb-6">
       <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex flex-col items-center justify-center">
         <span class="text-xs text-zinc-400 uppercase font-semibold">Dificultad</span>
@@ -379,12 +376,12 @@ function openLevelDetail(lvl, rank) {
         </div>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">Puntos</span>
+        <span class="text-xs text-zinc-400 uppercase font-semibold">Puntos Top</span>
         <p class="font-black text-amber-400 mt-1 text-sm">${levelPoints} pts</p>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">ID de GD</span>
-        <p class="font-bold text-indigo-400 mt-1 text-sm font-mono">${lvl.gdId || 'N/A'}</p>
+        <span class="text-xs text-zinc-400 uppercase font-semibold">Rating Web</span>
+        <p class="font-black text-indigo-400 mt-1 text-sm">${avgRating ? `⭐ ${avgRating}/100` : 'S/C'}</p>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
         <span class="text-xs text-zinc-400 uppercase font-semibold">Duración</span>
@@ -396,12 +393,20 @@ function openLevelDetail(lvl, rank) {
       </div>
     </div>
 
-    <div class="p-3 bg-white/5 rounded-xl border border-white/10 text-center mb-6">
-      <span class="text-xs text-zinc-400 uppercase font-semibold">Canción / Sonido: </span>
-      <span class="font-semibold text-white text-sm">${lvl.song || 'N/A'}</span>
+    <!-- SISTEMA DE CALIFICACIÓN (1 AL 100) ESTILO AREDL -->
+    <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-center mb-6">
+      <h3 class="text-xs font-bold text-zinc-400 uppercase mb-2">Calificar Nivel (1 - 100)</h3>
+      ${currentUserId ? `
+        <div class="flex justify-center items-center gap-2 max-w-xs mx-auto">
+          <input type="number" id="inputRatingScore" min="1" max="100" value="${userRating}" placeholder="1-100" class="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-white text-sm font-bold focus:border-indigo-500 focus:outline-none" />
+          <button id="btnSubmitRating" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition">Guardar</button>
+        </div>
+      ` : `
+        <p class="text-xs text-zinc-500">Inicia sesión con Discord para calificar este nivel.</p>
+      `}
     </div>
 
-    <!-- BARRITA DE RÉCORDS VERIFICADOS (SECCIÓN ESTILO WEONLIST) -->
+    <!-- SECCIÓN DE RÉCORDS -->
     <div class="p-5 bg-black/40 rounded-2xl border border-white/10">
       <h3 class="text-base font-extrabold text-white mb-1 text-center uppercase tracking-wider">Records</h3>
       <p class="text-xs text-zinc-400 text-center mb-4">100% requerido para calificar en la lista</p>
@@ -415,11 +420,10 @@ function openLevelDetail(lvl, rank) {
               <span class="font-bold text-white">${rec.playerName || 'Jugador'}</span>
               <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${rec.progress || 100}%</span>
             </div>
-            ${rec.videoUrl ? `
-              <a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
-                Video ↗
-              </a>
-            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
+            <div class="flex items-center gap-2">
+              ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Video ↗</a>` : ''}
+              ${rec.rawFootageUrl ? `<a href="${rec.rawFootageUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold transition border border-red-500/30">Raw ↗</a>` : ''}
+            </div>
           </div>
         `).join('')}
       </div>
@@ -441,6 +445,26 @@ function openLevelDetail(lvl, rank) {
     btnVideoVerif.className = "px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 hover:text-white transition";
     if (levelVideoFrame) levelVideoFrame.src = showcaseEmbed;
   });
+
+  // Guardar calificación del usuario
+  document.getElementById('btnSubmitRating')?.addEventListener('click', async () => {
+    const scoreVal = parseInt(document.getElementById('inputRatingScore').value);
+    if (isNaN(scoreVal) || scoreVal < 1 || scoreVal > 100) {
+      alert('Ingresa una calificación válida entre 1 y 100.');
+      return;
+    }
+
+    try {
+      if (lvl.key) {
+        await update(ref(db, `levels/${lvl.key}/ratings`), { [currentUserId]: scoreVal });
+        alert('¡Calificación guardada!');
+        openLevelDetail({ ...lvl, ratings: { ...(lvl.ratings || {}), [currentUserId]: scoreVal } }, rank);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error al guardar la calificación.');
+    }
+  });
 }
 
 function openPlayerDetail(player, rank) {
@@ -460,7 +484,6 @@ function openPlayerDetail(player, rank) {
     lvl.creatorId && lvl.creatorId.trim().toLowerCase() === player.name.trim().toLowerCase()
   );
 
-  // Buscar todos los récords completados por este jugador en todos los niveles
   const completedRecords = [];
   Object.values(globalLevelsCache).forEach(lvl => {
     if (lvl.records) {
@@ -484,34 +507,22 @@ function openPlayerDetail(player, rank) {
       </div>
     </div>
 
-    <!-- SECCIÓN DE NIVELES VERIFICADOS -->
+    <!-- NIVELES VERIFICADOS -->
     <div class="mb-6">
-      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3 flex items-center justify-between">
-        <span>Niveles Verificados (${verifiedLevels.length})</span>
-      </h3>
+      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3">Niveles Verificados (${verifiedLevels.length})</h3>
       <div class="space-y-2">
         ${verifiedLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel verificado.</p>' : ''}
         ${verifiedLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <div>
-              <span class="font-bold text-white text-sm">${lvl.name}</span>
-              <p class="text-xs text-zinc-400">Verificador Oficial</p>
-            </div>
-            ${lvl.verificationUrl ? `
-              <a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
-                Ver Video ↗
-              </a>
-            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
+            <span class="font-bold text-white text-sm">${lvl.name}</span>${lvl.verificationUrl ? `<a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
           </div>
         `).join('')}
       </div>
     </div>
 
-    <!-- SECCIÓN DE RÉCORDS COMPLETADOS -->
+    <!-- RÉCORDS COMPLETADOS -->
     <div class="mb-6">
-      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3 flex items-center justify-between">
-        <span>Récords Completados (${completedRecords.length})</span>
-      </h3>
+      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3">Récords Completados (${completedRecords.length})</h3>
       <div class="space-y-2">
         ${completedRecords.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún récord registrado.</p>' : ''}
         ${completedRecords.map(rec => `
@@ -520,30 +531,20 @@ function openPlayerDetail(player, rank) {
               <span class="font-bold text-white text-sm">${rec.levelName}</span>
               <span class="ml-2 text-xs font-semibold text-indigo-400">${rec.progress || 100}%</span>
             </div>
-            ${rec.videoUrl ? `
-              <a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
-                Ver Video ↗
-              </a>
-            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
+            ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
           </div>
         `).join('')}
       </div>
     </div>
 
-    <!-- SECCIÓN DE NIVELES CREADOS -->
+    <!-- NIVELES CREADOS -->
     <div>
-      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3 flex items-center justify-between">
-        <span>Niveles Creados (${createdLevels.length})</span>
-      </h3>
+      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3">Niveles Creados (${createdLevels.length})</h3>
       <div class="space-y-2">
         ${createdLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel creado.</p>' : ''}
         ${createdLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-white text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `
-              <a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
-                Ver Showcase ↗
-              </a>
-            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
+            <span class="font-bold text-white text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `<a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Showcase ↗</a>` : ''}
           </div>
         `).join('')}
       </div>
