@@ -23,6 +23,16 @@ let globalLevelsCache = {};
 let globalPlayersCache = [];
 let currentTab = 'lista';
 
+// Función para calcular puntos de un nivel según su posición en la lista (#1 = 100pts)
+function getPointsForRank(rank, totalLevels) {
+  if (rank <= 0) return 0;
+  const maxPoints = 100;
+  const minPoints = 10;
+  if (totalLevels <= 1) return maxPoints;
+  const step = (maxPoints - minPoints) / (totalLevels - 1);
+  return Math.round(maxPoints - step * (rank - 1));
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   updateUIImages();
   checkDiscordAuth();
@@ -333,6 +343,12 @@ function openLevelDetail(lvl, rank) {
   const verificationEmbed = getEmbedYoutubeUrl(lvl.verificationUrl);
   const showcaseEmbed = getEmbedYoutubeUrl(lvl.showcaseUrl);
 
+  const totalLevels = Object.keys(globalLevelsCache).length;
+  const levelPoints = getPointsForRank(rank, totalLevels);
+
+  // Obtener récords asociados a este nivel
+  const levelRecords = lvl.records ? Object.values(lvl.records) : [];
+
   detailContent.innerHTML = `
     <div class="text-center mb-6">
       <h1 class="text-3xl font-black text-white">#${rank} ${lvl.name}</h1>
@@ -354,13 +370,17 @@ function openLevelDetail(lvl, rank) {
     </div>
 
     <!-- INFORMACIÓN / ESTADÍSTICAS DEL NIVEL -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center mb-6">
       <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex flex-col items-center justify-center">
         <span class="text-xs text-zinc-400 uppercase font-semibold">Dificultad</span>
         <div class="flex items-center gap-1.5 mt-1">
           ${faceUrl ? `<img src="${faceUrl}" class="w-5 h-5 drop-shadow-md">` : ''}
           <span class="font-bold text-white uppercase text-xs">${lvl.difficulty}</span>
         </div>
+      </div>
+      <div class="p-3 bg-white/5 rounded-xl border border-white/10">
+        <span class="text-xs text-zinc-400 uppercase font-semibold">Puntos</span>
+        <p class="font-black text-amber-400 mt-1 text-sm">${levelPoints} pts</p>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
         <span class="text-xs text-zinc-400 uppercase font-semibold">ID de GD</span>
@@ -376,9 +396,33 @@ function openLevelDetail(lvl, rank) {
       </div>
     </div>
 
-    <div class="mt-3 p-3 bg-white/5 rounded-xl border border-white/10 text-center">
+    <div class="p-3 bg-white/5 rounded-xl border border-white/10 text-center mb-6">
       <span class="text-xs text-zinc-400 uppercase font-semibold">Canción / Sonido: </span>
       <span class="font-semibold text-white text-sm">${lvl.song || 'N/A'}</span>
+    </div>
+
+    <!-- BARRITA DE RÉCORDS VERIFICADOS (SECCIÓN ESTILO WEONLIST) -->
+    <div class="p-5 bg-black/40 rounded-2xl border border-white/10">
+      <h3 class="text-base font-extrabold text-white mb-1 text-center uppercase tracking-wider">Records</h3>
+      <p class="text-xs text-zinc-400 text-center mb-4">100% requerido para calificar en la lista</p>
+
+      <div class="space-y-2">
+        ${levelRecords.length === 0 ? `
+          <p class="text-center text-zinc-500 text-xs py-4 italic">No hay récords registrados aún para este nivel.</p>
+        ` : levelRecords.map(rec => `
+          <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between text-sm">
+            <div class="flex items-center gap-2">
+              <span class="font-bold text-white">${rec.playerName || 'Jugador'}</span>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${rec.progress || 100}%</span>
+            </div>
+            ${rec.videoUrl ? `
+              <a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
+                Video ↗
+              </a>
+            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
+          </div>
+        `).join('')}
+      </div>
     </div>
   `;
 
@@ -409,12 +453,24 @@ function openPlayerDetail(player, rank) {
   detailView?.classList.remove('hidden');
 
   const verifiedLevels = Object.values(globalLevelsCache).filter(lvl => 
-    lvl.verifierId && lvl.verifierId.toLowerCase() === player.name.toLowerCase()
+    lvl.verifierId && lvl.verifierId.trim().toLowerCase() === player.name.trim().toLowerCase()
   );
 
   const createdLevels = Object.values(globalLevelsCache).filter(lvl => 
-    lvl.creatorId && lvl.creatorId.toLowerCase() === player.name.toLowerCase()
+    lvl.creatorId && lvl.creatorId.trim().toLowerCase() === player.name.trim().toLowerCase()
   );
+
+  // Buscar todos los récords completados por este jugador en todos los niveles
+  const completedRecords = [];
+  Object.values(globalLevelsCache).forEach(lvl => {
+    if (lvl.records) {
+      Object.values(lvl.records).forEach(rec => {
+        if (rec.playerName && rec.playerName.trim().toLowerCase() === player.name.trim().toLowerCase()) {
+          completedRecords.push({ ...rec, levelName: lvl.name });
+        }
+      });
+    }
+  });
 
   detailContent.innerHTML = `
     <div class="flex items-center gap-4 pb-6 border-b border-white/10 mb-6">
@@ -437,10 +493,38 @@ function openPlayerDetail(player, rank) {
         ${verifiedLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel verificado.</p>' : ''}
         ${verifiedLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-white text-sm">${lvl.name}</span>
-            <a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">
-              Ver Video ↗
-            </a>
+            <div>
+              <span class="font-bold text-white text-sm">${lvl.name}</span>
+              <p class="text-xs text-zinc-400">Verificador Oficial</p>
+            </div>
+            ${lvl.verificationUrl ? `
+              <a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
+                Ver Video ↗
+              </a>
+            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- SECCIÓN DE RÉCORDS COMPLETADOS -->
+    <div class="mb-6">
+      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3 flex items-center justify-between">
+        <span>Récords Completados (${completedRecords.length})</span>
+      </h3>
+      <div class="space-y-2">
+        ${completedRecords.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún récord registrado.</p>' : ''}
+        ${completedRecords.map(rec => `
+          <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
+            <div>
+              <span class="font-bold text-white text-sm">${rec.levelName}</span>
+              <span class="ml-2 text-xs font-semibold text-indigo-400">${rec.progress || 100}%</span>
+            </div>
+            ${rec.videoUrl ? `
+              <a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
+                Ver Video ↗
+              </a>
+            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
           </div>
         `).join('')}
       </div>
@@ -455,10 +539,11 @@ function openPlayerDetail(player, rank) {
         ${createdLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel creado.</p>' : ''}
         ${createdLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-white text-sm">${lvl.name}</span>
-            <a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">
-              Ver Showcase ↗
-            </a>
+            <span class="font-bold text-white text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `
+              <a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30 flex items-center gap-1">
+                Ver Showcase ↗
+              </a>
+            ` : '<span class="text-xs text-zinc-500">Sin Video</span>'}
           </div>
         `).join('')}
       </div>
