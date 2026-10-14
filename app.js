@@ -1,3 +1,4 @@
+// app.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 import { saveDiscordUserToFirebase, fetchPlayersFromFirebase } from "./players.js";
@@ -32,7 +33,6 @@ function getPointsForRank(rank, totalLevels) {
   return Math.round(maxPoints - step * (rank - 1));
 }
 
-// Calcular promedio de calificación (1 - 100)
 function calculateAverageRating(ratings) {
   if (!ratings) return null;
   const values = Object.values(ratings);
@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('sunIcon')?.classList.toggle('hidden');
     document.getElementById('moonIcon')?.classList.toggle('hidden');
     updateUIImages();
+    refreshActiveTab();
   });
 
   const submitModal = document.getElementById('submitModal');
@@ -164,8 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnTabLeaderboard?.addEventListener('click', () => {
     currentTab = 'leaderboard';
-    btnTabLeaderboard.className = "px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition";
-    btnTabLista.className = "px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition";
+    btnTabLeaderboard.className = "tab-active px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition";
+    btnTabLista.className = "tab-inactive px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition";
     searchInput.placeholder = "🔍 Buscar jugadores...";
     searchInput.value = "";
     showMainList();
@@ -174,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   btnTabLista?.addEventListener('click', () => {
     currentTab = 'lista';
-    btnTabLista.className = "px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition";
-    btnTabLeaderboard.className = "px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition";
+    btnTabLista.className = "tab-active px-6 py-2.5 rounded-xl font-bold text-sm bg-indigo-600 text-white shadow-lg transition";
+    btnTabLeaderboard.className = "tab-inactive px-6 py-2.5 rounded-xl font-bold text-sm text-zinc-400 hover:text-white transition";
     searchInput.placeholder = "🔍 Buscar niveles...";
     searchInput.value = "";
     showMainList();
@@ -267,12 +268,12 @@ function renderLevelsList(levels, container) {
           ${faceUrl ? `<img src="${faceUrl}" class="w-6 h-6 absolute -bottom-1 -right-1 drop-shadow-md" title="${lvl.difficulty}">` : ''}
         </div>
         <div>
-          <h3 class="font-bold text-white text-base">${lvl.name}</h3>
-          <p class="text-xs text-zinc-400">Por: <span class="text-white font-semibold">${lvl.creatorId}</span> | Verificado: <span class="text-white font-semibold">${lvl.verifierId}</span></p>
+          <h3 class="font-bold text-level-title text-base">${lvl.name}</h3>
+          <p class="text-xs text-level-sub">Por: <span class="font-semibold text-level-author">${lvl.creatorId}</span> | Verificado: <span class="font-semibold text-level-author">${lvl.verifierId}</span></p>
         </div>
       </div>
       <div class="text-right flex items-center gap-2">
-        ${avgRating ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">⭐ ${avgRating}/100</span>` : ''}
+        ${avgRating ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">⭐ ${avgRating}/100</span>` : ''}
         <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30 uppercase">${lvl.difficulty}</span>
       </div>
     `;
@@ -298,10 +299,10 @@ function renderLeaderboardList(players, container) {
       <div class="flex items-center gap-3">
         <span class="font-bold text-lg ${index === 0 ? 'text-amber-400' : 'text-indigo-400'}">#${index + 1}</span>
         <div>
-          <h3 class="font-bold text-white text-base">${player.name}</h3>
-          <p class="text-xs text-zinc-400">
-            Creados: <span class="text-white font-semibold">${player.createdCount || 0}</span> |
-            Verificados: <span class="text-white font-semibold">${player.verifiedCount || 0}</span>
+          <h3 class="font-bold text-level-title text-base">${player.name}</h3>
+          <p class="text-xs text-level-sub">
+            Creados: <span class="font-semibold text-level-author">${player.createdCount || 0}</span> |
+            Verificados: <span class="font-semibold text-level-author">${player.verifiedCount || 0}</span>
           </p>
         </div>
       </div>
@@ -347,8 +348,8 @@ function openLevelDetail(lvl, rank) {
 
   detailContent.innerHTML = `
     <div class="text-center mb-6">
-      <h1 class="text-3xl font-black text-white">#${rank} ${lvl.name}</h1>
-      <p class="text-sm text-zinc-400 mt-1">
+      <h1 class="text-3xl font-black text-level-title">#${rank} ${lvl.name}</h1>
+      <p class="text-sm text-level-sub mt-1">
         Creado por: <span class="text-indigo-400 font-bold">${lvl.creatorId}</span> | 
         Verificado por: <span class="text-indigo-400 font-bold">${lvl.verifierId}</span>
       </p>
@@ -369,36 +370,36 @@ function openLevelDetail(lvl, rank) {
     <!-- ESTADÍSTICAS -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center mb-6">
       <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex flex-col items-center justify-center">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">Dificultad</span>
+        <span class="text-xs text-level-sub uppercase font-semibold">Dificultad</span>
         <div class="flex items-center gap-1.5 mt-1">
           ${faceUrl ? `<img src="${faceUrl}" class="w-5 h-5 drop-shadow-md">` : ''}
-          <span class="font-bold text-white uppercase text-xs">${lvl.difficulty}</span>
+          <span class="font-bold text-level-title uppercase text-xs">${lvl.difficulty}</span>
         </div>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">Puntos Top</span>
+        <span class="text-xs text-level-sub uppercase font-semibold">Puntos Top</span>
         <p class="font-black text-amber-400 mt-1 text-sm">${levelPoints} pts</p>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">Rating Web</span>
+        <span class="text-xs text-level-sub uppercase font-semibold">Rating Web</span>
         <p class="font-black text-indigo-400 mt-1 text-sm">${avgRating ? `⭐ ${avgRating}/100` : 'S/C'}</p>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">Duración</span>
-        <p class="font-bold text-white mt-1 text-sm">${lvl.duration || 'N/A'}</p>
+        <span class="text-xs text-level-sub uppercase font-semibold">Duración</span>
+        <p class="font-bold text-level-title mt-1 text-sm">${lvl.duration || 'N/A'}</p>
       </div>
       <div class="p-3 bg-white/5 rounded-xl border border-white/10">
-        <span class="text-xs text-zinc-400 uppercase font-semibold">Objetos</span>
-        <p class="font-bold text-white mt-1 text-sm">${lvl.objects || 'N/A'}</p>
+        <span class="text-xs text-level-sub uppercase font-semibold">Objetos</span>
+        <p class="font-bold text-level-title mt-1 text-sm">${lvl.objects || 'N/A'}</p>
       </div>
     </div>
 
     <!-- SISTEMA DE CALIFICACIÓN (1 AL 100) ESTILO AREDL -->
     <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-center mb-6">
-      <h3 class="text-xs font-bold text-zinc-400 uppercase mb-2">Calificar Nivel (1 - 100)</h3>
+      <h3 class="text-xs font-bold text-level-sub uppercase mb-2">Calificar Nivel (1 - 100)</h3>
       ${currentUserId ? `
         <div class="flex justify-center items-center gap-2 max-w-xs mx-auto">
-          <input type="number" id="inputRatingScore" min="1" max="100" value="${userRating}" placeholder="1-100" class="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-white text-sm font-bold focus:border-indigo-500 focus:outline-none" />
+          <input type="number" id="inputRatingScore" min="1" max="100" value="${userRating}" placeholder="1-100" class="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-level-title text-sm font-bold focus:border-indigo-500 focus:outline-none" />
           <button id="btnSubmitRating" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition">Guardar</button>
         </div>
       ` : `
@@ -408,8 +409,8 @@ function openLevelDetail(lvl, rank) {
 
     <!-- SECCIÓN DE RÉCORDS -->
     <div class="p-5 bg-black/40 rounded-2xl border border-white/10">
-      <h3 class="text-base font-extrabold text-white mb-1 text-center uppercase tracking-wider">Records</h3>
-      <p class="text-xs text-zinc-400 text-center mb-4">100% requerido para calificar en la lista</p>
+      <h3 class="text-base font-extrabold text-level-title mb-1 text-center uppercase tracking-wider">Records</h3>
+      <p class="text-xs text-level-sub text-center mb-4">100% requerido para calificar en la lista</p>
 
       <div class="space-y-2">
         ${levelRecords.length === 0 ? `
@@ -417,7 +418,7 @@ function openLevelDetail(lvl, rank) {
         ` : levelRecords.map(rec => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between text-sm">
             <div class="flex items-center gap-2">
-              <span class="font-bold text-white">${rec.playerName || 'Jugador'}</span>
+              <span class="font-bold text-level-title">${rec.playerName || 'Jugador'}</span>
               <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${rec.progress || 100}%</span>
             </div>
             <div class="flex items-center gap-2">
@@ -446,7 +447,6 @@ function openLevelDetail(lvl, rank) {
     if (levelVideoFrame) levelVideoFrame.src = showcaseEmbed;
   });
 
-  // Guardar calificación del usuario
   document.getElementById('btnSubmitRating')?.addEventListener('click', async () => {
     const scoreVal = parseInt(document.getElementById('inputRatingScore').value);
     if (isNaN(scoreVal) || scoreVal < 1 || scoreVal > 100) {
@@ -467,6 +467,15 @@ function openLevelDetail(lvl, rank) {
   });
 }
 
+function matchesPlayer(rawField, player) {
+  if (!rawField || !player) return false;
+  const str = String(rawField).trim().toLowerCase();
+  const name = player.name ? player.name.trim().toLowerCase() : '';
+  const discordId = player.discordId ? player.discordId.trim().toLowerCase() : '';
+  const id = player.id ? player.id.trim().toLowerCase() : '';
+  return str === name || str === discordId || str === id;
+}
+
 function openPlayerDetail(player, rank) {
   document.getElementById('levelsContainer')?.classList.add('hidden');
   document.getElementById('searchContainer')?.classList.add('hidden');
@@ -476,19 +485,14 @@ function openPlayerDetail(player, rank) {
   const detailContent = document.getElementById('playerDetailContent');
   detailView?.classList.remove('hidden');
 
-  const verifiedLevels = Object.values(globalLevelsCache).filter(lvl => 
-    lvl.verifierId && lvl.verifierId.trim().toLowerCase() === player.name.trim().toLowerCase()
-  );
-
-  const createdLevels = Object.values(globalLevelsCache).filter(lvl => 
-    lvl.creatorId && lvl.creatorId.trim().toLowerCase() === player.name.trim().toLowerCase()
-  );
+  const verifiedLevels = Object.values(globalLevelsCache).filter(lvl => matchesPlayer(lvl.verifierId, player));
+  const createdLevels = Object.values(globalLevelsCache).filter(lvl => matchesPlayer(lvl.creatorId, player));
 
   const completedRecords = [];
   Object.values(globalLevelsCache).forEach(lvl => {
     if (lvl.records) {
       Object.values(lvl.records).forEach(rec => {
-        if (rec.playerName && rec.playerName.trim().toLowerCase() === player.name.trim().toLowerCase()) {
+        if (matchesPlayer(rec.playerName || rec.userId, player)) {
           completedRecords.push({ ...rec, levelName: lvl.name });
         }
       });
@@ -501,20 +505,20 @@ function openPlayerDetail(player, rank) {
       <div>
         <div class="flex items-center gap-2">
           <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-600 text-white">#${rank}</span>
-          <h1 class="text-2xl font-black text-white">${player.name}</h1>
+          <h1 class="text-2xl font-black text-level-title">${player.name}</h1>
         </div>
-        <p class="text-xs text-zinc-400 mt-1">Puntos Totales: <span class="font-extrabold text-indigo-400 text-sm">${player.points || 0} pts</span></p>
+        <p class="text-xs text-level-sub mt-1">Puntos Totales: <span class="font-extrabold text-indigo-400 text-sm">${player.points || 0} pts</span></p>
       </div>
     </div>
 
     <!-- NIVELES VERIFICADOS -->
     <div class="mb-6">
-      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3">Niveles Verificados (${verifiedLevels.length})</h3>
+      <h3 class="text-sm font-bold text-level-sub uppercase mb-3">Niveles Verificados (${verifiedLevels.length})</h3>
       <div class="space-y-2">
         ${verifiedLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel verificado.</p>' : ''}
         ${verifiedLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-white text-sm">${lvl.name}</span>${lvl.verificationUrl ? `<a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
+            <span class="font-bold text-level-title text-sm">${lvl.name}</span>${lvl.verificationUrl ? `<a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
           </div>
         `).join('')}
       </div>
@@ -522,13 +526,13 @@ function openPlayerDetail(player, rank) {
 
     <!-- RÉCORDS COMPLETADOS -->
     <div class="mb-6">
-      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3">Récords Completados (${completedRecords.length})</h3>
+      <h3 class="text-sm font-bold text-level-sub uppercase mb-3">Récords Completados (${completedRecords.length})</h3>
       <div class="space-y-2">
         ${completedRecords.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún récord registrado.</p>' : ''}
         ${completedRecords.map(rec => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
             <div>
-              <span class="font-bold text-white text-sm">${rec.levelName}</span>
+              <span class="font-bold text-level-title text-sm">${rec.levelName}</span>
               <span class="ml-2 text-xs font-semibold text-indigo-400">${rec.progress || 100}%</span>
             </div>
             ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
@@ -539,12 +543,12 @@ function openPlayerDetail(player, rank) {
 
     <!-- NIVELES CREADOS -->
     <div>
-      <h3 class="text-sm font-bold text-zinc-300 uppercase mb-3">Niveles Creados (${createdLevels.length})</h3>
+      <h3 class="text-sm font-bold text-level-sub uppercase mb-3">Niveles Creados (${createdLevels.length})</h3>
       <div class="space-y-2">
         ${createdLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel creado.</p>' : ''}
         ${createdLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-white text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `<a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Showcase ↗</a>` : ''}
+            <span class="font-bold text-level-title text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `<a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Showcase ↗</a>` : ''}
           </div>
         `).join('')}
       </div>
