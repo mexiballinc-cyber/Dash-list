@@ -171,16 +171,20 @@ body.light-theme .shadow-lg {
   box-shadow: 0 10px 20px rgba(79, 70, 229, 0.12) !important;
 }
 
-body.light-theme #btnTabLista,
-body.light-theme #btnTabLeaderboard {
+/* FIX: Corrección de contraste para los botones de las pestañas en Modo Claro */
+body.light-theme #btnTabLista.bg-indigo-600,
+body.light-theme #btnTabLeaderboard.bg-indigo-600 {
   color: #ffffff !important;
+  background-color: #4f46e5 !important;
 }
 
-body.light-theme #btnTabLeaderboard {
+body.light-theme #btnTabLista:not(.bg-indigo-600),
+body.light-theme #btnTabLeaderboard:not(.bg-indigo-600) {
   color: rgba(15, 23, 42, 0.7) !important;
 }
 
-body.light-theme #btnTabLeaderboard:hover {
+body.light-theme #btnTabLista:not(.bg-indigo-600):hover,
+body.light-theme #btnTabLeaderboard:not(.bg-indigo-600):hover {
   color: #111827 !important;
 }
 
@@ -234,6 +238,16 @@ body.light-theme .border-indigo-500\/50 {
 
 body.light-theme .bg-indigo-500\/20 {
   background-color: rgba(79, 70, 229, 0.10) !important;
+}
+
+/* FIX: Mantiene visibles los badges de calificación (estrellas) en modo claro */
+body.light-theme .bg-amber-500\/20 {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+
+body.light-theme .text-amber-300,
+body.light-theme .text-amber-400 {
+  color: #d97706 !important;
 }
 
 body.light-theme .text-zinc-100 {
