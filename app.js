@@ -355,11 +355,10 @@ function openLevelDetail(lvl, rank) {
       </p>
     </div>
 
-    <!-- BOTONES CONMUTADORES DE VIDEO -->
+    <!-- BOTONES CONMUTADORES DE VIDEO (SIN BOTÓN ROJO DE RAW FOOTAGE) -->
     <div class="flex justify-center gap-2 mb-4">
       <button id="btnVideoVerif" class="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-lg transition">Verification</button>
       <button id="btnVideoShowcase" class="px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 hover:text-white transition">Showcase</button>
-      ${lvl.rawFootageUrl ? `<a href="${lvl.rawFootageUrl}" target="_blank" class="px-5 py-2 rounded-xl text-xs font-bold bg-red-600/30 text-red-300 hover:bg-red-600 hover:text-white transition border border-red-500/30 flex items-center gap-1">Raw Footage ↗</a>` : ''}
     </div>
 
     <!-- REPRODUCTOR DE VIDEO -->
@@ -407,7 +406,7 @@ function openLevelDetail(lvl, rank) {
       `}
     </div>
 
-    <!-- SECCIÓN DE RÉCORDS -->
+    <!-- SECCIÓN DE RÉCORDS (SIN BOTÓN ROJO DE RAW FOOTAGE) -->
     <div class="p-5 bg-black/40 rounded-2xl border border-white/10">
       <h3 class="text-base font-extrabold text-level-title mb-1 text-center uppercase tracking-wider">Records</h3>
       <p class="text-xs text-level-sub text-center mb-4">100% requerido para calificar en la lista</p>
@@ -423,7 +422,6 @@ function openLevelDetail(lvl, rank) {
             </div>
             <div class="flex items-center gap-2">
               ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Video ↗</a>` : ''}
-              ${rec.rawFootageUrl ? `<a href="${rec.rawFootageUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-red-600/30 hover:bg-red-600 text-red-300 hover:text-white text-xs font-bold transition border border-red-500/30">Raw ↗</a>` : ''}
             </div>
           </div>
         `).join('')}
