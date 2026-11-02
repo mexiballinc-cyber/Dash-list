@@ -283,35 +283,34 @@ function renderLevelsList(levels, container) {
     const card = document.createElement('div');
     card.className = 'glass-nav p-4 rounded-2xl flex items-center justify-between border border-white/10 mb-3 shadow-lg transition hover:border-indigo-500/50 cursor-pointer';
     card.innerHTML = `
-      <div class="flex items-center gap-4">
-        <span class="font-black text-xl text-indigo-400">#${index + 1}</span>
-        <div class="relative">
-          <img src="${lvl.imgurUrl || ''}" class="w-16 h-12 object-cover rounded-lg border border-white/10" alt="${lvl.name}">
-          ${faceUrl ? `<img src="${faceUrl}" class="w-6 h-6 absolute -bottom-1 -right-1 drop-shadow-md" title="${lvl.difficulty}">` : ''}
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+        <span class="font-black text-lg sm:text-xl text-indigo-400 shrink-0">#${index + 1}</span>
+        <div class="relative shrink-0 level-card-thumb">
+          <img src="${lvl.imgurUrl || ''}" class="level-cover" alt="${lvl.name}">
+          ${faceUrl ? `<img src="${faceUrl}" class="w-5 h-5 sm:w-6 sm:h-6 absolute -bottom-1 -right-1 drop-shadow-md" title="${lvl.difficulty}">` : ''}
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h3 class="font-bold text-level-title text-base">${lvl.name}</h3>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 min-w-0 flex-wrap">
+            <h3 class="font-bold text-level-title text-sm sm:text-base truncate">${lvl.name}</h3>
             ${lvl.gdId ? `
-              <button data-id="${lvl.gdId}" class="btn-copy-id text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800/90 hover:bg-indigo-600 text-zinc-400 hover:text-white border border-white/10 transition flex items-center gap-1" title="Clic para copiar ID">
+              <button data-id="${lvl.gdId}" class="btn-copy-id text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800/90 hover:bg-indigo-600 text-zinc-400 hover:text-white border border-white/10 flex-shrink-0">
                 <span>📋</span> ${lvl.gdId}
               </button>
             ` : ''}
           </div>
-          <p class="text-xs text-level-sub mt-0.5">Por: <span class="font-semibold text-level-author">${lvl.creatorId}</span> | Verificado: <span class="font-semibold text-level-author">${lvl.verifierId}</span></p>
+          <p class="text-[11px] sm:text-xs text-level-sub mt-0.5 truncate">Por: <span class="font-semibold text-level-author">${lvl.creatorId}</span> | Verificado: <span class="font-semibold text-level-author">${lvl.verifierId}</span></p>
         </div>
       </div>
-      <div class="text-right flex items-center gap-2">
-        ${avgRating ? `<span class="text-xs px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">⭐ ${avgRating}/100</span>` : ''}
-        <span class="text-xs px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30 uppercase">${lvl.difficulty}</span>
+      <div class="text-right flex items-center gap-2 shrink-0 ml-3">
+        ${avgRating ? `<span class="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-amber-500/20 text-amber-400 font-bold border border-amber-500/30">⭐ ${avgRating}/100</span>` : ''}
+        <span class="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/30 uppercase">${lvl.difficulty}</span>
       </div>
     `;
 
-    // Evento de clic en el botón de copiar ID
     const copyBtn = card.querySelector('.btn-copy-id');
     if (copyBtn) {
       copyBtn.addEventListener('click', (e) => {
-        e.stopPropagation(); // Evita abrir los detalles del nivel
+        e.stopPropagation();
         copyToClipboard(lvl.gdId, `¡ID ${lvl.gdId} copiado!`);
       });
     }
@@ -390,7 +389,7 @@ function openLevelDetail(lvl, rank) {
       
       ${lvl.gdId ? `
         <div class="my-2">
-          <button id="btnCopyDetailId" class="text-xs font-mono px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 transition items-center gap-1.5 inline-flex font-bold">
+          <button id="btnCopyDetailId" class="text-xs font-mono px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600 text-indigo-300 hover:text-white border border-indigo-500/30 transition">
             <span>📋</span> ID GD: ${lvl.gdId} (Clic para copiar)
           </button>
         </div>
@@ -402,18 +401,15 @@ function openLevelDetail(lvl, rank) {
       </p>
     </div>
 
-    <!-- BOTONES CONMUTADORES DE VIDEO -->
     <div class="flex justify-center gap-2 mb-4">
       <button id="btnVideoVerif" class="px-5 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white shadow-lg transition">Verification</button>
       <button id="btnVideoShowcase" class="px-5 py-2 rounded-xl text-xs font-bold bg-zinc-800 text-zinc-400 hover:text-white transition">Showcase</button>
     </div>
 
-    <!-- REPRODUCTOR DE VIDEO -->
     <div class="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black mb-6">
       <iframe id="levelVideoFrame" src="${verificationEmbed}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>
     </div>
 
-    <!-- ESTADÍSTICAS -->
     <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center mb-6">
       <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex flex-col items-center justify-center">
         <span class="text-xs text-level-sub uppercase font-semibold">Dificultad</span>
@@ -440,12 +436,11 @@ function openLevelDetail(lvl, rank) {
       </div>
     </div>
 
-    <!-- SISTEMA DE CALIFICACIÓN (1 AL 100) ESTILO AREDL -->
     <div class="p-4 bg-white/5 rounded-xl border border-white/10 text-center mb-6">
       <h3 class="text-xs font-bold text-level-sub uppercase mb-2">Calificar Nivel (1 - 100)</h3>
       ${currentUserId ? `
         <div class="flex justify-center items-center gap-2 max-w-xs mx-auto">
-          <input type="number" id="inputRatingScore" min="1" max="100" value="${userRating}" placeholder="1-100" class="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-level-title text-sm font-bold focus:border-indigo-500 focus:outline-none" />
+          <input type="number" id="inputRatingScore" min="1" max="100" value="${userRating}" placeholder="1-100" class="w-24 bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-1.5 text-center text-white text-sm focus:border-indigo-500 focus:outline-none">
           <button id="btnSubmitRating" class="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg text-xs transition">Guardar</button>
         </div>
       ` : `
@@ -453,7 +448,6 @@ function openLevelDetail(lvl, rank) {
       `}
     </div>
 
-    <!-- SECCIÓN DE RÉCORDS -->
     <div class="p-5 bg-black/40 rounded-2xl border border-white/10">
       <h3 class="text-base font-extrabold text-level-title mb-1 text-center uppercase tracking-wider">Records</h3>
       <p class="text-xs text-level-sub text-center mb-4">100% requerido para calificar en la lista</p>
@@ -468,7 +462,8 @@ function openLevelDetail(lvl, rank) {
               <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">${rec.progress || 100}%</span>
             </div>
             <div class="flex items-center gap-2">
-              ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Video ↗</a>` : ''}
+              ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition">Video</a>` : ''}
+              ${rec.rawFootageUrl ? `<a href="${rec.rawFootageUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white text-xs font-bold transition">Raw</a>` : ''}
             </div>
           </div>
         `).join('')}
@@ -560,20 +555,18 @@ function openPlayerDetail(player, rank) {
       </div>
     </div>
 
-    <!-- NIVELES VERIFICADOS -->
     <div class="mb-6">
       <h3 class="text-sm font-bold text-level-sub uppercase mb-3">Niveles Verificados (${verifiedLevels.length})</h3>
       <div class="space-y-2">
         ${verifiedLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel verificado.</p>' : ''}
         ${verifiedLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-level-title text-sm">${lvl.name}</span>${lvl.verificationUrl ? `<a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
+            <span class="font-bold text-level-title text-sm">${lvl.name}</span>${lvl.verificationUrl ? `<a href="${lvl.verificationUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition">Ver</a>` : ''}
           </div>
         `).join('')}
       </div>
     </div>
 
-    <!-- RÉCORDS COMPLETADOS -->
     <div class="mb-6">
       <h3 class="text-sm font-bold text-level-sub uppercase mb-3">Récords Completados (${completedRecords.length})</h3>
       <div class="space-y-2">
@@ -584,20 +577,19 @@ function openPlayerDetail(player, rank) {
               <span class="font-bold text-level-title text-sm">${rec.levelName}</span>
               <span class="ml-2 text-xs font-semibold text-indigo-400">${rec.progress || 100}%</span>
             </div>
-            ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Ver Video ↗</a>` : ''}
+            ${rec.videoUrl ? `<a href="${rec.videoUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition">Video</a>` : ''}
           </div>
         `).join('')}
       </div>
     </div>
 
-    <!-- NIVELES CREADOS -->
     <div>
       <h3 class="text-sm font-bold text-level-sub uppercase mb-3">Niveles Creados (${createdLevels.length})</h3>
       <div class="space-y-2">
         ${createdLevels.length === 0 ? '<p class="text-xs text-zinc-500 italic">Ningún nivel creado.</p>' : ''}
         ${createdLevels.map(lvl => `
           <div class="p-3 bg-white/5 rounded-xl border border-white/10 flex items-center justify-between">
-            <span class="font-bold text-level-title text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `<a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition border border-indigo-500/30">Showcase ↗</a>` : ''}
+            <span class="font-bold text-level-title text-sm">${lvl.name}</span>${lvl.showcaseUrl ? `<a href="${lvl.showcaseUrl}" target="_blank" class="px-3 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-300 hover:text-white text-xs font-bold transition">Ver</a>` : ''}
           </div>
         `).join('')}
       </div>
